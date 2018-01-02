@@ -8,7 +8,7 @@ Sub ticketCount()
 ' Purpose   :   To get no. of Tickets depending on conditions from Data File to Dashboard .
 '
 ' Author    :   Subhankar Paul, 9th February, 2017
-    ' Notes     :   Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant, gonna updated soon
+    ' Notes     :   Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant, Shambhavi made some changes
 '
 ' Parameter :   N/A
 ' Returns   :   N/A
