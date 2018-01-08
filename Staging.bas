@@ -18,24 +18,23 @@ Sub mainDataStaging()
 ' -> Priority column converted from string to number format
 '========================================================================================================
 Dim WB As Workbook
-Dim WS_CR As Worksheet
+Dim WS_RD As Worksheet
 Dim WS_DA As Worksheet
-Dim sCr As String
+Dim sRd As String
 Dim sDa As String
-Dim CRlro As Long
+Dim RDlro As Long
 Dim DAlro As Long
 Dim R As Long
 Dim C As Long
 
-sCr = "Raw Data"
+sRd = "Raw Data"
 sDa = "MainData"
 
 Set WB = ActiveWorkbook
-Set WS_CR = WB.Sheets(sCr)
+Set WS_RD = WB.Sheets(sRd)
 Set WS_DA = WB.Sheets(sDa)
 
-WB.Sheets(sDa).Activate
-Sheets(sDa).Select
+WS_DA.Activate
 
 DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row
 
@@ -44,22 +43,21 @@ If DAlro >= 1 Then
     WS_DA.Range("A1:Z" & (DAlro)).Clear
 End If
 
-WB.Sheets(sCr).Activate
-Sheets(sCr).Range("A1").Select
-
-CRlro = WS_CR.Cells(WS_CR.Rows.Count, "A").End(xlUp).Row
+WS_RD.Activate
+RDlro = WS_RD.Cells(WS_RD.Rows.Count, "A").End(xlUp).Row
 
 'Copying Raw Data to MainData
-WS_CR.Range(Cells(R + 1, C + 2), Cells(R + CRlro, C + 19)).Copy
-Sheets(sDa).Select
+WS_RD.Range(Cells(R + 1, C + 2), Cells(R + RDlro, C + 19)).Copy
+WS_DA.Select
 WS_DA.Range("A1").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
 
-Sheets(sDa).Range("A1").Select
+WS_DA.Range("A1").Select
+
 DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row
 
 'Converting priority from string to number
 WS_DA.Range(Cells(R + 2, C + 26), Cells(R + DAlro, C + 26)).Formula = "=NUMBERVALUE(LEFT(L2,1))"
-WS_DA.Range(Cells(R + 1, C + 26), Cells(R + CRlro, C + 26)).Copy
+WS_DA.Range(Cells(R + 1, C + 26), Cells(R + RDlro, C + 26)).Copy
 WS_DA.Range("Z1").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
 WS_DA.Range(Cells(R + 2, C + 26), Cells(R + DAlro, C + 26)).Cut Destination:=WS_DA.Range("L2")
 
