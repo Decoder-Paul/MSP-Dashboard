@@ -1,19 +1,18 @@
-'Author- Subhankar paul - Shambhavi
 Attribute VB_Name = "Main"
 Public ver1_stDt, ver1_enDt, ver2_stDt, ver2_enDt As Date
 Public ver3_stDt, ver3_enDt, ver4_stDt, ver4_enDt As Date
-    Public Function fSheetExists(sheetToFind As String) As Boolean
-        On Error GoTo ErrorHandler
-        Dim sheet As Worksheet
-        fSheetExists = False
-        For Each sheet In Worksheets
-            If sheetToFind = sheet.Name Then
-                fSheetExists = True
-                Exit Function
-            End If
-        Next sheet
-ErrorHandler:
-    End Function
+'Following sheet variables are global and initialised in Open Workbook event
+Public WB As Workbook
+'Consolidated Support Stats
+Public WS_CSS As Worksheet
+'Main Data
+Public WS_DA As Worksheet
+'Raw Data
+Public WS_RD As Worksheet
+'Home
+Public WS_HM As Worksheet
+'Consolidated Performance Audit
+Public WS_CPA As Worksheet
 Sub InputDate()
 
 Dim WB As Workbook
