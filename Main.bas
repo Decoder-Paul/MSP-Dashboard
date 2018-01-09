@@ -13,6 +13,8 @@ Attribute VB_Name = "Main"
     Public WS_CPA As Worksheet
     'Date of quarters will be stored here, accessible globally
     Public quarters(14, 1) As Variant
+    
+    Public c As Integer
 
     Public StartTime As Double
     Public SecondsElapsed As Double
@@ -38,7 +40,6 @@ Sub pOpenApp()
     Set WS_HM = WB.Sheets("Home")
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
 
-On Error GoTo ErrorHandler
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
     
@@ -50,8 +51,8 @@ On Error GoTo ErrorHandler
     
     Call CreateUniqueList
     
-ErrorHandler:
- 
+    Call QtrReplication
+     
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
     ' Determine how many seconds this code will take to run
@@ -74,7 +75,7 @@ Sub InputDate()
 ' Revision History
 '
 '========================================================================================================
-    Dim c As Integer
+
     Dim i As Integer
     
     WS_HM.Select
@@ -88,4 +89,3 @@ Sub InputDate()
         i = i + 1
     Next i
 End Sub
-

@@ -51,3 +51,47 @@ Sub CreateUniqueList()
     ActiveSheet.Range("H1:H" & lastrow).AdvancedFilter Action:=xlFilterCopy, CopyToRange:=ActiveSheet.Range("V1"), Unique:=True
      
 End Sub
+
+Sub QtrReplication()
+
+'========================================================================================================
+' Main Data for Staging
+' -------------------------------------------------------------------------------------------------------
+' Purpose   :   Qruarter replication for quarter based report generation
+'
+' Author    :   Shambhavi B M, 9th January, 2018
+' Notes     :   N/A
+'
+' Parameter :   N/A
+' Returns   :   N/A
+' -------------------------------------------------------------------------------------------------------
+' Revision History
+'
+'========================================================================================================
+
+Dim lro As Long
+Dim R As Long
+
+WS_CSS.Select
+CSSlro = WS_CSS.Cells(WS_CSS.Rows.Count, "C").End(xlUp).Row
+
+If c > 1 Then
+    
+    'Selection and deletion of below dashboard except top
+    Rows("49:" & CSSlro).Select
+    Selection.Delete Shift:=xlUp
+    
+    'Selection of top dashboard template and replicating based on the number of quarter
+    Range("A34:W48").Select
+    Selection.AutoFill Destination:=Range("A34:W" & (48 + c * 15)), Type:=xlFillDefault
+
+    Rows("34:" & CSSlro).RowHeight = 30
+    Rows("34:" & CSSlro).ColumnWidth = 6
+    
+    Columns("A:B").ColumnWidth = 8
+    Columns("C").ColumnWidth = 13
+    Columns("S").ColumnWidth = 9
+    
+End If
+
+End Sub
