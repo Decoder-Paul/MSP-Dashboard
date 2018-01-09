@@ -45,11 +45,9 @@ Sub pCleanDB()
 End Sub
 
 Sub CreateUniqueList()
-
-Dim lastrow As Long
-
-lastrow = Cells(Rows.Count, "H").End(xlUp).Row
-    
+    WS_DA.Select
+    Dim lastrow As Long
+    lastrow = Cells(Rows.Count, "H").End(xlUp).Row
     ActiveSheet.Range("H1:H" & lastrow).AdvancedFilter Action:=xlFilterCopy, CopyToRange:=ActiveSheet.Range("V1"), Unique:=True
      
 End Sub
