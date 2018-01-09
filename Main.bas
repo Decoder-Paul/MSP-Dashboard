@@ -46,12 +46,12 @@ Sub pOpenApp()
     Call InputDate
 
 '    Call pCleanDB
+    Call QtrReplication
     
     Call mainDataStaging
     
     Call CreateUniqueList
     
-    Call QtrReplication
      
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
