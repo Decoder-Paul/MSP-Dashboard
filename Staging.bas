@@ -17,22 +17,11 @@ Sub mainDataStaging()
 '    CW End Date,Finish Date to date format
 ' -> Priority column converted from string to number format
 '========================================================================================================
-Dim WB As Workbook
-Dim WS_RD As Worksheet
-Dim WS_DA As Worksheet
-Dim sRd As String
-Dim sDa As String
+
 Dim RDlro As Long
 Dim DAlro As Long
 Dim R As Long
 Dim C As Long
-
-sRd = "Raw Data"
-sDa = "MainData"
-
-Set WB = ActiveWorkbook
-Set WS_RD = WB.Sheets(sRd)
-Set WS_DA = WB.Sheets(sDa)
 
 WS_DA.Activate
 

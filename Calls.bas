@@ -43,3 +43,13 @@ Sub pCleanDB()
     WS_CSS.Range("D34:W48").ClearContents
     
 End Sub
+
+Sub CreateUniqueList()
+
+Dim lastrow As Long
+
+lastrow = Cells(Rows.Count, "H").End(xlUp).Row
+    
+    ActiveSheet.Range("H1:H" & lastrow).AdvancedFilter Action:=xlFilterCopy, CopyToRange:=ActiveSheet.Range("V1"), Unique:=True
+     
+End Sub
