@@ -52,6 +52,8 @@ Sub pOpenApp()
     
     Call CreateUniqueList
     
+    Call teamsDashboard
+    
      
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
@@ -88,4 +90,50 @@ Sub InputDate()
         End If
         i = i + 1
     Next i
+End Sub
+
+Sub teamsDashboard()
+'========================================================================================================
+' Main Data for Staging
+' -------------------------------------------------------------------------------------------------------
+' Purpose   :   Contains formated raw data for the data extraction
+'
+' Author    :   Shambhavi B M, 10th January, 2018
+' Notes     :   N/A
+'
+' Parameter :   N/A
+' Returns   :   N/A
+' -------------------------------------------------------------------------------------------------------
+' Revision History
+'
+'========================================================================================================
+
+Dim DAlro As Long
+Dim a As Long
+Dim list(20) As String
+Dim Item As Variant
+
+WS_DA.Activate
+
+'last row of MainData
+DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
+
+'Calling ReplicateMainSheet method for each team
+a = 0
+For i = 2 To DAlro
+    WS_DA.Activate
+    list(a) = Cells(i, 22).Value
+    Item = list(a)
+    Call ReplicateMainSheet(Item)
+    a = a + 1
+Next i
+
+End Sub
+
+Sub ReplicateMainSheet(ByVal Item As String)
+    
+    'creating copy of Consolidated Support Stats sheet and renaming by team name
+    Sheets("Consolidated Support Stats").Copy after:=Sheets("Consolidated Performance Audit")
+    ActiveSheet.Name = Item
+
 End Sub
