@@ -45,7 +45,7 @@ Sub pOpenApp()
     
     Call InputDate
 
-'    Call pCleanDB
+'   Call pCleanDB
     Call QtrReplication
     
     Call mainDataStaging
@@ -110,7 +110,6 @@ Sub teamsDashboard()
 
 Dim DAlro As Long
 Dim a As Long
-Dim list(20) As String
 Dim Item As Variant
 
 WS_DA.Activate
@@ -122,8 +121,7 @@ DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
 a = 0
 For i = 2 To DAlro
     WS_DA.Activate
-    list(a) = Cells(i, 22).Value
-    Item = list(a)
+    Item = Cells(i, 22).Value
     Call ReplicateMainSheet(Item)
     a = a + 1
 Next i
@@ -131,7 +129,16 @@ Next i
 End Sub
 
 Sub ReplicateMainSheet(ByVal Item As String)
-    
+
+'   Deleting the existing Team file then only it'll create new sheet
+    For Each sheet In Worksheets
+        If Item = sheet.Name Then
+            'once the sheet name matched getting out of the loop
+            Sheets(Item).Delete
+            GoTo below
+        End If
+    Next sheet
+below:
     'creating copy of Consolidated Support Stats sheet and renaming by team name
     Sheets("Consolidated Support Stats").Copy after:=Sheets("Consolidated Performance Audit")
     ActiveSheet.Name = Item
