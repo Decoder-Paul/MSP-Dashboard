@@ -81,18 +81,21 @@ For i = 2 To DAlro
     End If
 Next i
 
-'columns and rows alignment
-WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 18)).Interior.Color = RGB(46, 139, 87)
-WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 18)).RowHeight = 30
-WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 18)).VerticalAlignment = xlCenter
+'Aging column created for capturing aging count
+WS_DA.Cells(R + 1, c + 19).Value = "Aging"
 
-Range(Cells(R + 1, c + 1), Cells(R + DAlro, c + 18)).Select
+'columns and rows alignment
+WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).Interior.Color = RGB(46, 139, 87)
+WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).RowHeight = 30
+WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).VerticalAlignment = xlCenter
+
+Range(Cells(R + 1, c + 1), Cells(R + DAlro, c + 19)).Select
 With Selection
     .Columns.AutoFit
 End With
 
 For Each BI In Array(xlEdgeTop, xlEdgeLeft, xlEdgeBottom, xlEdgeRight, xlInsideHorizontal, xlInsideVertical)
-    With Range(Cells(R + 1, c + 1), Cells(R + DAlro, c + 18)).Borders(BI)
+    With Range(Cells(R + 1, c + 1), Cells(R + DAlro, c + 19)).Borders(BI)
          .Weight = xlThin
          .Color = RGB(148, 138, 84)
     End With
