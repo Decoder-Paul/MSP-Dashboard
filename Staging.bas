@@ -29,7 +29,7 @@ DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row
 
 'Clearing all data in MainData
 If DAlro >= 1 Then
-    WS_DA.Range("A1:Z" & (DAlro)).Clear
+    WS_DA.Range("A1:AA" & (DAlro)).Clear
 End If
 
 WS_RD.Activate
@@ -57,7 +57,29 @@ WS_DA.Range(Cells(R + 2, c + 11), Cells(R + DAlro, c + 11)).NumberFormat = "[$-1
 WS_DA.Range(Cells(R + 2, c + 16), Cells(R + DAlro, c + 16)).NumberFormat = "[$-14009]dd-mm-yyyy;@"
 WS_DA.Range(Cells(R + 2, c + 17), Cells(R + DAlro, c + 17)).NumberFormat = "[$-14009]dd-mm-yyyy;@"
 
+'Copying all the dates and pasting after team/classification column
+WS_DA.Range(Cells(R + 1, c + 9), Cells(R + RDlro, c + 11)).Copy
+WS_DA.Range("W1").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+WS_DA.Range(Cells(R + 1, c + 16), Cells(R + RDlro, c + 17)).Copy
+WS_DA.Range("Z1").PasteSpecial Paste:=xlPasteValues, Operation:=xlNone, SkipBlanks:=False, Transpose:=False
+
 Application.CutCopyMode = False
+
+For i = 2 To DAlro
+    Cells(i, 23).Value = CLng(Cells(i, 9).Value) 'Creation Date Converted to Integer
+    If Cells(i, 10).Value <> "" Then
+        Cells(i, 24).Value = CLng(Cells(i, 10).Value) 'Actual start Date Converted to Integer
+    End If
+    If Cells(i, 11).Value <> "" Then
+        Cells(i, 25).Value = CLng(Cells(i, 11).Value) 'Actual Finish Date Converted to Integer
+    End If
+    If Cells(i, 16).Value <> "" Then
+        Cells(i, 26).Value = CLng(Cells(i, 16).Value) 'CW start Date Converted to Integer
+    End If
+    If Cells(i, 17).Value <> "" Then
+        Cells(i, 27).Value = CLng(Cells(i, 17).Value) 'CW End Date Converted to Integer
+    End If
+Next i
 
 'columns and rows alignment
 WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 18)).Interior.Color = RGB(46, 139, 87)
