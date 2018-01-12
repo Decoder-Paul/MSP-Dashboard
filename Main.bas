@@ -13,7 +13,7 @@ Attribute VB_Name = "Main"
     Public WS_CPA As Worksheet
     'Date of quarters will be stored here, accessible globally
     Public quarters(14, 1) As Variant
-    
+    'This is the no. of quarters
     Public c As Integer
 
     Public StartTime As Double
@@ -96,7 +96,7 @@ Sub teamsDashboard()
 '========================================================================================================
 ' Main Data for Staging
 ' -------------------------------------------------------------------------------------------------------
-' Purpose   :   Contains formated raw data for the data extraction
+' Purpose   :   It's responsible to call other procedure for generating report team wise
 '
 ' Author    :   Shambhavi B M, 10th January, 2018
 ' Notes     :   N/A
@@ -110,7 +110,7 @@ Sub teamsDashboard()
 
 Dim DAlro As Long
 Dim a As Long
-Dim Item As Variant
+Dim team As String
 
 WS_DA.Activate
 
@@ -121,8 +121,14 @@ DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
 a = 0
 For i = 2 To DAlro
     WS_DA.Activate
-    Item = Cells(i, 22).Value
-    Call ReplicateMainSheet(Item)
+    'getting team name from main data
+    team = Cells(i, 22).Value
+    'generating the dashboard for each team and quarterwise
+    For j = 0 To c
+        Call ticketCount(team, j)
+    Next j
+    'replicating the team's dashboard
+    Call ReplicateMainSheet(team)
     a = a + 1
 Next i
 

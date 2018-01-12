@@ -45,6 +45,7 @@ Sub pCleanDB()
 End Sub
 
 Sub CreateUniqueList()
+'Populating the list of unique team names in Column V in Main Data Sheet
     WS_DA.Select
     Dim lastrow As Long
     lastrow = Cells(Rows.Count, "H").End(xlUp).Row
