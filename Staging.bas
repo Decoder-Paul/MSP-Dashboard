@@ -84,6 +84,19 @@ Next i
 'Aging column created for capturing aging count
 WS_DA.Cells(R + 1, c + 19).Value = "Aging"
 
+'Aging for the closed ticket(ActualfinishDate-ActualstartDate) to calculate average closure duration
+For i = 2 To DAlro
+    If Cells(i, 25).Value <> "" Then
+        If Cells(i, 24).Value <> "" Then
+            Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 24).Value
+        Else
+            Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
+        End If
+    Else
+        Cells(i, 19).Value = ""
+    End If
+Next i
+
 'columns and rows alignment
 WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).Interior.Color = RGB(46, 139, 87)
 WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).RowHeight = 30

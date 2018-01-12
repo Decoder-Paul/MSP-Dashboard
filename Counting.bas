@@ -9,8 +9,7 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 ' Author    :   Subhankar Paul, 11th January, 2018
 ' Notes     :   Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant
 '
-' Parameter :   team,v - team and quarter wise the procedure will be called repeatedly, v is the row no. of
-'               quarter array
+' Parameter :   team,v - team and quarter wise the procedure will be called repeatedly
 ' Returns   :   N/A
 ' ---------------------------------------------------------------
 ' Revision History
@@ -24,7 +23,7 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Inc(4) As Integer
     Dim closed_Inc(4) As Integer
     Dim reOpen_Inc(4) As Integer
-    Dim totEff_Inc(4) As Long
+    Dim totEff_Inc(4) As Integer
     Dim avgEff_Inc(4) As Integer
     Dim tmSize_Inc(4) As Integer
     Dim rspSla_Inc(4) As Integer
@@ -38,7 +37,7 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Srq(4) As Integer
     Dim closed_Srq(4) As Integer
     Dim reOpen_Srq(4) As Integer
-    Dim totEff_Srq(4) As Long
+    Dim totEff_Srq(4) As Integer
     Dim avgEff_Srq(4) As Integer
     Dim tmSize_Srq(4) As Integer
     Dim rspSla_Srq(4) As Integer
@@ -52,7 +51,7 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Prb(4) As Integer
     Dim closed_Prb(4) As Integer
     Dim reOpen_Prb(4) As Integer
-    Dim totEff_Prb(4) As Long
+    Dim totEff_Prb(4) As Integer
     Dim avgEff_Prb(4) As Integer
     Dim tmSize_Prb(4) As Integer
     Dim rspSla_Prb(4) As Integer
@@ -66,75 +65,21 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Chg(4) As Integer
     Dim closed_Chg(4) As Integer
     Dim reOpen_Chg(4) As Integer
-    Dim totEff_Chg(4) As Long
+    Dim totEff_Chg(4) As Integer
     Dim avgEff_Chg(4) As Integer
     Dim tmSize_Chg(4) As Integer
     Dim winMiss_Chg(4) As Integer
     Dim winMissPrcnt_Chg(4) As Integer
-    '---- variables to store the required values of each record for computation -----
-    Dim Data_rowCount, Data_i, j As Long
-    Dim tkt_type, rspnd, resl, person, status, reOpnd As String
-    Dim prty As Integer
-    Dim effort As Double
-    Dim open_date As Long
-    Dim closed_date As Long
-
-    Dim age_of_tkt As Variant
-    Dim startDate As Long
-    Dim endDate As Long
     
-    WS_DA.Select
-
-    'parameter v is used to get the quarter version
-    startDate = CLng(quarters(v, 0))
-    endDate = CLng(quarters(v, 1))
-    
-    Data_rowCount = ActiveSheet.Cells(Rows.Count, "A").End(xlUp).Row
-
-    For Data_i = 2 To Data_rowCount
-        '------------------ Filtering Data for TEAM ----------------------
-        If Cells(Data_i, 8).Value = team Then
-            'Opening balance: finish date = "" and create Date <= Start Date
-            If Cells(Data_i, 25).Value = "" And Cells(Data_i, 23).Value <= startDate Then
-                tkt_type = Cells(Data_i, 1).Value
-                prty = Cells(Data_i, 12).Value
-                
-            '------------------ Filtering Data for Quarter ----------------------
-            'Resolved: end_Date >= 'Finish Date' >= start_Date
-            ElseIf Cells(Data_i, 25).Value >= startDate And Cells(Data_i, 25).Value <= endDate Then
-                'Initialising the variables
-                tkt_type = Cells(Data_i, 1).Value   'Ticket Type
-                
-                resl = Cells(Data_i, 3).Value       'Resl_SLA_Met
-                prty = Cells(Data_i, 12).Value      'Priority
-                effort = Cells(Data_i, 13).Value    'Actual effort(min)
-                status = Cells(Data_i, 15).Value    'Status
-                reOpnd = Cells(Data_i, 18).Value    'Re-opened(Y/N)
-                Aging = Cells(Data_i, 19).Value     'Aging
-            
-            'Received: end_Date >= 'Create Date' >= start_Date
-            ElseIf Cells(Data_i, 23).Value >= startDate And Cells(Data_i, 23).Value <= endDate Then
-                tkt_type = Cells(Data_i, 1).Value
-                prty = Cells(Data_i, 12).Value
-                rspnd = Cells(Data_i, 2).Value      'Resp_SLA_Met
-                
-                'Carried Forward: finish date = "" and end_Date >= 'Create Date' >= start_Date
-                If Cells(Data_i, 25).Value = "" Then
-                    
-                End If
-            End If
-        End If
-    Next Data_i
-    
+    WS_DA.Range("A1:AA1").Select
     Selection.AutoFilter
     With Selection
-        
+    '------------------ Filtering Data for Quarter ----------------------
+    ' end_Date >= 'Finish Date' >= start_Date
+        .AutoFilter Field:=19, Criteria1:=">=" & CLng(quarters(v, 0)), Operator:=xlAnd, Criteria2:="<=" & CLng(quarters(v, 1))
+    '------------------ Filtering Data for TEAM ----------------------
         .AutoFilter Field:=8, Criteria1:=team
 
-        .AutoFilter Field:=25, Criteria1:=">=" & CLng(quarters(v, 0)), Operator:=xlAnd, Criteria2:="<=" & CLng(quarters(v, 1))
-            
-    
-        
 
 
 
