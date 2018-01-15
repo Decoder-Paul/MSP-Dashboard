@@ -130,6 +130,7 @@ a = 0
 For i = 2 To DAlro
     WS_DA.Activate
     Item = Cells(i, 22).Value
+    Call pCleanDB
     Call agingCount(Item)
     Call ReplicateMainSheet(Item)
     a = a + 1
