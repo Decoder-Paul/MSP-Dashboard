@@ -8,7 +8,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 '
 ' Author    :   Subhankar Paul, 11th January, 2018
 ' Notes     :   Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant
-'
+'               4 parameters are calculated at the end of the count are
+'               Avg Effort, ResponseSLA %, ResolutionSLA % & Avg Closure Duration
 ' Parameter :   team,v - team and quarter wise the procedure will be called repeatedly, v is the row no. of
 '               quarter array
 ' Returns   :   N/A
@@ -26,11 +27,12 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim reOpen_Inc(4) As Integer
     Dim totEff_Inc(4) As Long
     Dim avgEff_Inc(4) As Integer
-    Dim tmSize_Inc(4) As Integer
+    Dim tmSize_Inc As Integer
     Dim rspSla_Inc(4) As Integer
     Dim rspSlaPrcnt_Inc(4) As Integer
     Dim resSla_Inc(4) As Integer
     Dim resSlaPrcnt_Inc(4) As Integer
+    Dim cloDur_Inc(4) As Long
     Dim avgClosure_Inc(4) As Integer
     '--------Service Request--------
     Dim opnBal_Srq(4) As Integer
@@ -40,11 +42,12 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim reOpen_Srq(4) As Integer
     Dim totEff_Srq(4) As Long
     Dim avgEff_Srq(4) As Integer
-    Dim tmSize_Srq(4) As Integer
+    Dim tmSize_Srq As Integer
     Dim rspSla_Srq(4) As Integer
     Dim rspSlaPrcnt_Srq(4) As Integer
     Dim resSla_Srq(4) As Integer
     Dim resSlaPrcnt_Srq(4) As Integer
+    Dim cloDur_Srq(4) As Long
     Dim avgClosure_Srq(4) As Integer
     '--------Problem Statement--------
     Dim opnBal_Prb(4) As Integer
@@ -54,11 +57,12 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim reOpen_Prb(4) As Integer
     Dim totEff_Prb(4) As Long
     Dim avgEff_Prb(4) As Integer
-    Dim tmSize_Prb(4) As Integer
+    Dim tmSize_Prb As Integer
     Dim rspSla_Prb(4) As Integer
     Dim rspSlaPrcnt_Prb(4) As Integer
     Dim resSla_Prb(4) As Integer
     Dim resSlaPrcnt_Prb(4) As Integer
+    Dim cloDur_Prb(4) As Long
     Dim avgClosure_Prb(4) As Integer
     '--------Change Request--------
     Dim opnBal_Chg(4) As Integer
@@ -68,18 +72,30 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim reOpen_Chg(4) As Integer
     Dim totEff_Chg(4) As Long
     Dim avgEff_Chg(4) As Integer
-    Dim tmSize_Chg(4) As Integer
+    Dim tmSize_Chg As Integer
     Dim winMiss_Chg(4) As Integer
     Dim winMissPrcnt_Chg(4) As Integer
     '---- variables to store the required values of each record for computation -----
-    Dim Data_rowCount, Data_i, j As Long
-    Dim tkt_type, rspnd, resl, person, status, reOpnd As String
+    Dim Data_rowCount As Long
+    Dim Data_i As Long
+    Dim j As Long
+    
+    Dim tkt_type As String
+    Dim reOpnd As String
+    Dim rspSLA As String
+    Dim resSLA As String
     Dim prty As Integer
     Dim effort As Double
-    Dim open_date As Long
-    Dim closed_date As Long
-
-    Dim age_of_tkt As Variant
+    Dim createDate As Long
+    Dim finishDate As Long
+    '------------ Dictionary Creation for Distinct Count of Assigned resource --
+    Dim INC_Dict, CHG_Dict, SRQ_Dict, PRB_Dict As Object
+    Set INC_Dict = CreateObject("scripting.dictionary")
+    Set CHG_Dict = CreateObject("scripting.dictionary")
+    Set SRQ_Dict = CreateObject("scripting.dictionary")
+    Set PRB_Dict = CreateObject("scripting.dictionary")
+    
+    
     Dim startDate As Long
     Dim endDate As Long
     
@@ -94,51 +110,72 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     For Data_i = 2 To Data_rowCount
         '------------------ Filtering Data for TEAM ----------------------
         If Cells(Data_i, 8).Value = team Then
-            'Opening balance: finish date = "" and create Date <= Start Date
-            If Cells(Data_i, 25).Value = "" And Cells(Data_i, 23).Value <= startDate Then
-                tkt_type = Cells(Data_i, 1).Value
-                prty = Cells(Data_i, 12).Value
-                
-            '------------------ Filtering Data for Quarter ----------------------
-            'Resolved: end_Date >= 'Finish Date' >= start_Date
-            ElseIf Cells(Data_i, 25).Value >= startDate And Cells(Data_i, 25).Value <= endDate Then
-                'Initialising the variables
-                tkt_type = Cells(Data_i, 1).Value   'Ticket Type
-                
-                resl = Cells(Data_i, 3).Value       'Resl_SLA_Met
-                prty = Cells(Data_i, 12).Value      'Priority
-                effort = Cells(Data_i, 13).Value    'Actual effort(min)
-                status = Cells(Data_i, 15).Value    'Status
-                reOpnd = Cells(Data_i, 18).Value    'Re-opened(Y/N)
-                Aging = Cells(Data_i, 19).Value     'Aging
-            
-            'Received: end_Date >= 'Create Date' >= start_Date
-            ElseIf Cells(Data_i, 23).Value >= startDate And Cells(Data_i, 23).Value <= endDate Then
-                tkt_type = Cells(Data_i, 1).Value
-                prty = Cells(Data_i, 12).Value
-                rspnd = Cells(Data_i, 2).Value      'Resp_SLA_Met
-                
-                'Carried Forward: finish date = "" and end_Date >= 'Create Date' >= start_Date
-                If Cells(Data_i, 25).Value = "" Then
-                    
-                End If
-            End If
+            tkt_type = Cells(Data_i, 1).Value ' Ticket Type
+            prty = Cells(Data_i, 12).Value ' Priority
+            createDate = Cells(Data_i, 23).Value
+            finishDate = Cells(Data_i, 25).Value
+            reOpnd = Cells(Data_i, 18).Value
+            rspSLA = Cells(Data_i, 2).Value
+            resSLA = Cells(Data_i, 3).Value
+            Select Case tkt_type
+                'If Incident ticket type
+                Case "INC"
+                    If INC_Dict.Exists(element) Then
+                        INC_Dict.Item(element) = INC_Dict.Item(element) + 1
+                    Else
+                        INC_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            If finishDate = "" Or finishDate > endDate Then
+                                opnBal_Inc(0) = opnBal_Inc(0) + 1
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(0) = recvd_Inc(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Inc(0) = rspSla_Inc(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(0) = reOpen_Inc(0) + 1
+                            End If
+                            'Carried Forward:
+                            If finishDate = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        End If
         End If
     Next Data_i
     
-    Selection.AutoFilter
-    With Selection
-        
-        .AutoFilter Field:=8, Criteria1:=team
-
-        .AutoFilter Field:=25, Criteria1:=">=" & CLng(quarters(v, 0)), Operator:=xlAnd, Criteria2:="<=" & CLng(quarters(v, 1))
-            
-    
-        
-
-
-
-
 
 
     '------------------ Values Placement of the Variable in Excel sheet -------------
