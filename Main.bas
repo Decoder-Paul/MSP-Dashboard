@@ -13,13 +13,11 @@ Attribute VB_Name = "Main"
     Public WS_CPA As Worksheet
     'Date of quarters will be stored here, accessible globally
     Public quarters(14, 1) As Variant
-    
-    'Date of report
-    Public DateOfreport As Date
-    
+    'This is the no. of quarters
     Public c As Integer
 
-
+    Public StartTime As Double
+    Public SecondsElapsed As Double
 Sub pOpenApp()
 '========================================================================================================
 ' pOpenApp
@@ -34,19 +32,13 @@ Sub pOpenApp()
 ' Revision History
 '
 '========================================================================================================
-    Dim StartTime As Double
-    Dim SecondsElapsed As Double
-    StartTime = Timer
-    
+
     Set WB = ActiveWorkbook
     Set WS_CSS = WB.Sheets("Consolidated Support Stats")
     Set WS_DA = WB.Sheets("MainData")
     Set WS_RD = WB.Sheets("Raw Data")
     Set WS_HM = WB.Sheets("Home")
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
-    
-    'Date of report taking from Home sheet in L column
-    DateOfreport = WS_HM.Cells(5, 12).Value
 
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
@@ -104,7 +96,7 @@ Sub teamsDashboard()
 '========================================================================================================
 ' Main Data for Staging
 ' -------------------------------------------------------------------------------------------------------
-' Purpose   :   Contains formated raw data for the data extraction
+' Purpose   :   It's responsible to call other procedure for generating report team wise
 '
 ' Author    :   Shambhavi B M, 10th January, 2018
 ' Notes     :   N/A
@@ -118,7 +110,7 @@ Sub teamsDashboard()
 
 Dim DAlro As Long
 Dim a As Long
-Dim Item As Variant
+Dim team As String
 
 WS_DA.Activate
 
@@ -129,10 +121,15 @@ DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
 a = 0
 For i = 2 To DAlro
     WS_DA.Activate
-    Item = Cells(i, 22).Value
-    Call pCleanDB
-    Call agingCount(Item)
-    Call ReplicateMainSheet(Item)
+    Call agingCount(team)
+    'getting team name from main data
+    team = Cells(i, 22).Value
+    'generating the dashboard for each team and quarterwise
+    For j = 0 To c
+        Call ticketCount(team, j)
+    Next j
+    'replicating the team's dashboard
+    Call ReplicateMainSheet(team)
     a = a + 1
 Next i
 
