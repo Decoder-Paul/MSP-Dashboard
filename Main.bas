@@ -32,7 +32,7 @@ Sub pOpenApp()
 ' Revision History
 '
 '========================================================================================================
-
+    StartTime = Timer
     Set WB = ActiveWorkbook
     Set WS_CSS = WB.Sheets("Consolidated Support Stats")
     Set WS_DA = WB.Sheets("MainData")
@@ -108,29 +108,41 @@ Sub teamsDashboard()
 '
 '========================================================================================================
 
-Dim DAlro As Long
-Dim a As Long
-Dim team As String
-
-WS_DA.Activate
-
-'last row of MainData
-DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
-
-'Calling ReplicateMainSheet method for each team
-a = 0
-For i = 2 To DAlro
+    Dim DAlro As Long
+    Dim a As Long
+    Dim team As String
+    
     WS_DA.Activate
-    'getting team name from main data
-    team = Cells(i, 22).Value
-    'generating the dashboard for each team and quarterwise
-    For j = 0 To c
-        Call ticketCount(team, j)
-    Next j
-    'replicating the team's dashboard
-    Call ReplicateMainSheet(team)
-    a = a + 1
-Next i
+    
+    'getting no. teams from main data
+    DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
+    
+    'Calling ReplicateMainSheet method for each team
+    For i = 2 To DAlro
+        WS_DA.Activate
+        'getting team name from main data
+        team = Cells(i, 22).Value
+        'generating the dashboard for each team and quarterwise
+        For j = 0 To c
+            Call ticketCount(team, j)
+        Next j
+        
+        'replicating the team's dashboard
+        Call ReplicateMainSheet(team)
+        
+        'cleansing of CSS sheet after replication
+        'Active Ticket's stat table
+        WS_CSS.Range("D5:R9").ClearContents
+        WS_CSS.Range("T5:X9").ClearContents
+        
+        'Aging Data Table
+        WS_CSS.Range("D14:R23").ClearContents
+        WS_CSS.Range("D28:R28").ClearContents
+        
+        'Quarter Stats Table
+        WS_CSS.Range("D34:W48").ClearContents
+    
+    Next i
 
 End Sub
 
