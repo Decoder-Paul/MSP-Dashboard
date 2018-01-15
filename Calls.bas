@@ -28,7 +28,7 @@ Sub pCleanDB()
 'Procedure to clean the Dashboard
 
     'Home sheet content cleansing
-    WS_HM.Range("D5:F33").ClearContents
+    'WS_HM.Range("D5:F33").ClearContents
     
     'Support Dashboard contents cleansing
     'Active Ticket's stat table

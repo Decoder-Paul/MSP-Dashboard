@@ -113,7 +113,7 @@ Sub teamsDashboard()
     Dim team As String
     
     WS_DA.Activate
-    
+
     'getting no. teams from main data
     DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
     
@@ -122,14 +122,13 @@ Sub teamsDashboard()
         WS_DA.Activate
         'getting team name from main data
         team = Cells(i, 22).Value
+        Call agingCount(team)
         'generating the dashboard for each team and quarterwise
         For j = 0 To c
             Call ticketCount(team, j)
-        Next j
-        
+        Next j        
         'replicating the team's dashboard
         Call ReplicateMainSheet(team)
-        
         'cleansing of CSS sheet after replication
         'Active Ticket's stat table
         WS_CSS.Range("D5:R9").ClearContents

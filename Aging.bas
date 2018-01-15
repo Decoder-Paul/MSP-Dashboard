@@ -64,33 +64,39 @@ today = DateOfreport
 WS_DA.Activate
 DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row
 
+'cleaning Aging column in mainData before calculating aging for team
+WS_DA.Range("S2:S" & DAlro).Clear
 
-Sheets("MainData").Range("A1:AA1").Select
-Selection.AutoFilter
+'Aging calculation logic
+For i = 2 To DAlro
 
-With Selection
-    
-     '.AutoFilter Field:=25, Criteria1:="", Operator:=xlOr, Criteria2:=">=" & CLng(DateOfreport)
-     '------------------ Filtering Data for TEAM ----------------------
-     .AutoFilter Field:=8, Criteria1:=team
-     
-     For i = 2 To DAlro
-     
-        If Cells(i, 25).Value = "" Or Cells(i, 25).Value >= CLng(DateOfreport) Then
-            If Cells(i, 24).Value <> "" And Cells(i, 24).Value <= CLng(DateOfreport) Then
+    'checking whether Actualfinish date is not empty and should be greater than date of report
+    If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(DateOfreport) Then
+        'checking whether Actual start date is not empty or not
+        If Cells(i, 24).Value <> "" Then
+                'if Actual start date is empty then taking dufference between DateOfreport and Actualstartdate
                 Cells(i, 19).Value = CLng(DateOfreport) - Cells(i, 24).Value
-            Else
-                If Cells(i, 24).Value = "" And Cells(i, 23).Value <= CLng(DateOfreport) Then
+        Else
+            'if Actual start date is empty then taking the difference between DateOfreport and Creation date
+            If Cells(i, 24).Value = "" Then
                     Cells(i, 19).Value = CLng(DateOfreport) - Cells(i, 23).Value
-                End If
             End If
         End If
-        
+    Else
+        'if Actualfinish date empty aging is empty
+        Cells(i, 19).Value = ""
+    End If
+Next i
+
+'------------Counting aging based on team, ticket type and priority-----------------
+For i = 2 To DAlro
+    
+     If Cells(i, 8).Value = team Then
+             
         ticket_type = Cells(i, 1).Value
         priority = Cells(i, 12).Value
         age_of_tkt = Cells(i, 19).Value
 
-        
         Select Case ticket_type
             Case "INC":
                 Select Case priority
@@ -113,7 +119,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_INC(0) = Days61_90_INC(0) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_INC(0) = Days_Sum_INC(0) + 1
+                                    Days_GT_90_INC(0) = Days_GT_90_INC(0) + 1
                                 End If
                             End If
                     Case 2:
@@ -135,7 +141,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_INC(1) = Days61_90_INC(1) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_INC(1) = Days_Sum_INC(1) + 1
+                                    Days_GT_90_INC(1) = Days_GT_90_INC(1) + 1
                                 End If
                             End If
                             
@@ -158,7 +164,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_INC(2) = Days61_90_INC(2) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_INC(2) = Days_Sum_INC(2) + 1
+                                    Days_GT_90_INC(2) = Days_GT_90_INC(2) + 1
                                 End If
                             End If
                     
@@ -181,7 +187,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_INC(3) = Days61_90_INC(3) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_INC(3) = Days_Sum_INC(3) + 1
+                                    Days_GT_90_INC(3) = Days_GT_90_INC(3) + 1
                                 End If
                             End If
                                 
@@ -207,7 +213,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_SRQ(0) = Days61_90_SRQ(0) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_SRQ(0) = Days_Sum_SRQ(0) + 1
+                                    Days_GT_90_SRQ(0) = Days_GT_90_SRQ(0) + 1
                                 End If
                             End If
                     Case 2:
@@ -229,7 +235,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_SRQ(1) = Days61_90_SRQ(1) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_SRQ(1) = Days_Sum_SRQ(1) + 1
+                                    Days_GT_90_SRQ(1) = Days_GT_90_SRQ(1) + 1
                                 End If
                             End If
                             
@@ -252,7 +258,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_SRQ(2) = Days61_90_SRQ(2) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_SRQ(2) = Days_Sum_SRQ(2) + 1
+                                    Days_GT_90_SRQ(2) = Days_GT_90_SRQ(2) + 1
                                 End If
                             End If
                     
@@ -275,7 +281,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_SRQ(3) = Days61_90_SRQ(3) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_SRQ(3) = Days_Sum_SRQ(3) + 1
+                                    Days_GT_90_SRQ(3) = Days_GT_90_SRQ(3) + 1
                                 End If
                             End If
                 End Select
@@ -300,7 +306,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_PRB(0) = Days61_90_PRB(0) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_PRB(0) = Days_Sum_PRB(0) + 1
+                                    Days_GT_90_PRB(0) = Days_GT_90_PRB(0) + 1
                                 End If
                             End If
                     Case 2:
@@ -322,7 +328,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_PRB(1) = Days61_90_PRB(1) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_PRB(1) = Days_Sum_PRB(1) + 1
+                                    Days_GT_90_PRB(1) = Days_GT_90_PRB(1) + 1
                                 End If
                             End If
                             
@@ -345,7 +351,7 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_PRB(2) = Days61_90_PRB(2) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_PRB(2) = Days_Sum_PRB(2) + 1
+                                    Days_GT_90_PRB(2) = Days_GT_90_PRB(2) + 1
                                 End If
                             End If
                     
@@ -368,58 +374,85 @@ With Selection
                                 ElseIf age_of_tkt >= 61 And age_of_tkt <= 90 Then
                                     Days61_90_PRB(3) = Days61_90_PRB(3) + 1
                                 ElseIf age_of_tkt > 90 Then
-                                    Days_Sum_PRB(3) = Days_Sum_PRB(3) + 1
+                                    Days_GT_90_PRB(3) = Days_GT_90_PRB(3) + 1
                                 End If
                             End If
                 End Select
         End Select
-     
-     Next i
-     
-        .AutoFilter Field:=1, Criteria1:="INC"
-        
-            .AutoFilter Field:=12, Criteria1:="1"
-            
-            'Days0_1_INC (0)=
+     End If
+Next i
+'------------Counting aging based on team, ticket type and priority-----------------
 
-End With
-
-
+WS_CSS.Select
 'values insertion to the respective cells in the dashboard
 '----------Incident----------
-Range("D14:H14").Value = Days0_1_INC
-Range("D15:H15").Value = Days2_3_INC
-Range("D16:H16").Value = Days4_5_INC
-Range("D17:H17").Value = Days6_7_INC
-Range("D18:H18").Value = Days8_14_INC
-Range("D19:H19").Value = Days15_30_INC
-Range("D20:H20").Value = Days31_60_INC
-Range("D21:H21").Value = Days61_90_INC
-Range("D22:H22").Value = Days_GT_90_INC
-Range("D23:H23").Value = Days_Sum_INC
+Range("D14:G14").Value = Days0_1_INC
+Range("D15:G15").Value = Days2_3_INC
+Range("D16:G16").Value = Days4_5_INC
+Range("D17:G17").Value = Days6_7_INC
+Range("D18:G18").Value = Days8_14_INC
+Range("D19:G19").Value = Days15_30_INC
+Range("D20:G20").Value = Days31_60_INC
+Range("D21:G21").Value = Days61_90_INC
+Range("D22:G22").Value = Days_GT_90_INC
+Range("D23:G23").Value = Days_Sum_INC
 
 '--------Service Request--------
-Range("I14:M14").Value = Days0_1_SRQ
-Range("I15:M15").Value = Days2_3_SRQ
-Range("I16:M16").Value = Days4_5_SRQ
-Range("I17:M17").Value = Days6_7_SRQ
-Range("I18:M18").Value = Days8_14_SRQ
-Range("I19:M19").Value = Days15_30_SRQ
-Range("I20:M20").Value = Days31_60_SRQ
-Range("I21:M21").Value = Days61_90_SRQ
-Range("I22:M22").Value = Days_GT_90_SRQ
-Range("I23:M23").Value = Days_Sum_SRQ
+Range("I14:L14").Value = Days0_1_SRQ
+Range("I15:L15").Value = Days2_3_SRQ
+Range("I16:L16").Value = Days4_5_SRQ
+Range("I17:L17").Value = Days6_7_SRQ
+Range("I18:L18").Value = Days8_14_SRQ
+Range("I19:L19").Value = Days15_30_SRQ
+Range("I20:L20").Value = Days31_60_SRQ
+Range("I21:L21").Value = Days61_90_SRQ
+Range("I22:L22").Value = Days_GT_90_SRQ
+Range("I23:L23").Value = Days_Sum_SRQ
 
 '--------Problem Statement--------
-Range("N14:R14").Value = Days0_1_PRB
-Range("N15:R15").Value = Days2_3_PRB
-Range("N16:R16").Value = Days4_5_PRB
-Range("N17:R17").Value = Days6_7_PRB
-Range("N18:R18").Value = Days8_14_PRB
-Range("N19:R19").Value = Days15_30_PRB
-Range("N20:R20").Value = Days31_60_PRB
-Range("N21:R21").Value = Days61_90_PRB
-Range("N22:R22").Value = Days_GT_90_PRB
-Range("N23:R23").Value = Days_Sum_PRB
+Range("N14:Q14").Value = Days0_1_PRB
+Range("N15:Q15").Value = Days2_3_PRB
+Range("N16:Q16").Value = Days4_5_PRB
+Range("N17:Q17").Value = Days6_7_PRB
+Range("N18:Q18").Value = Days8_14_PRB
+Range("N19:Q19").Value = Days15_30_PRB
+Range("N20:Q20").Value = Days31_60_PRB
+Range("N21:Q21").Value = Days61_90_PRB
+Range("N22:Q22").Value = Days_GT_90_PRB
+Range("N23:Q23").Value = Days_Sum_PRB
+
+'----------Total Incident----------
+Cells(14, 8).Formula = "=Sum(D14:G14)"
+Cells(15, 8).Formula = "=Sum(D15:G15)"
+Cells(16, 8).Formula = "=Sum(D16:G16)"
+Cells(17, 8).Formula = "=Sum(D17:G17)"
+Cells(18, 8).Formula = "=Sum(D18:G18)"
+Cells(19, 8).Formula = "=Sum(D19:G19)"
+Cells(20, 8).Formula = "=Sum(D20:G20)"
+Cells(21, 8).Formula = "=Sum(D21:G21)"
+Cells(22, 8).Formula = "=Sum(D22:G22)"
+
+'--------Total Service Request--------
+Cells(14, 13).Formula = "=Sum(I14:L14)"
+Cells(15, 13).Formula = "=Sum(I15:L15)"
+Cells(16, 13).Formula = "=Sum(I16:L16)"
+Cells(17, 13).Formula = "=Sum(I17:L17)"
+Cells(18, 13).Formula = "=Sum(I18:L18)"
+Cells(19, 13).Formula = "=Sum(I19:L19)"
+Cells(20, 13).Formula = "=Sum(I20:L20)"
+Cells(21, 13).Formula = "=Sum(I21:L21)"
+Cells(22, 13).Formula = "=Sum(I22:L22)"
+
+'--------Total Problem Statement--------
+Cells(14, 18).Formula = "=Sum(N14:Q14)"
+Cells(15, 18).Formula = "=Sum(N15:Q15)"
+Cells(16, 18).Formula = "=Sum(N16:Q16)"
+Cells(17, 18).Formula = "=Sum(N17:Q17)"
+Cells(18, 18).Formula = "=Sum(N18:Q18)"
+Cells(19, 18).Formula = "=Sum(N19:Q19)"
+Cells(20, 18).Formula = "=Sum(N20:Q20)"
+Cells(21, 18).Formula = "=Sum(N21:Q21)"
+Cells(22, 18).Formula = "=Sum(N22:Q22)"
+
 
 End Sub
