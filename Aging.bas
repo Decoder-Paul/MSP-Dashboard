@@ -51,12 +51,35 @@ Dim Days61_90_PRB(4) As Integer
 Dim Days_GT_90_PRB(4) As Integer
 Dim Days_Sum_PRB(4) As Integer
 
+Dim INC_Dict_P1, INC_Dict_P2, INC_Dict_P3, INC_Dict_P4andP5, INC_Dict_total As Object
+Dim SRQ_Dict_P1, SRQ_Dict_P2, SRQ_Dict_P3, SRQ_Dict_P4andP5, SRQ_Dict_total As Object
+Dim PRB_Dict_P1, PRB_Dict_P2, PRB_Dict_P3, PRB_Dict_P4andP5, PRB_Dict_total As Object
+
+Set INC_Dict_P1 = CreateObject("scripting.dictionary")
+Set INC_Dict_P2 = CreateObject("scripting.dictionary")
+Set INC_Dict_P3 = CreateObject("scripting.dictionary")
+Set INC_Dict_P4andP5 = CreateObject("scripting.dictionary")
+Set INC_Dict_total = CreateObject("scripting.dictionary")
+
+Set SRQ_Dict_P1 = CreateObject("scripting.dictionary")
+Set SRQ_Dict_P2 = CreateObject("scripting.dictionary")
+Set SRQ_Dict_P3 = CreateObject("scripting.dictionary")
+Set SRQ_Dict_P4andP5 = CreateObject("scripting.dictionary")
+Set SRQ_Dict_total = CreateObject("scripting.dictionary")
+
+Set PRB_Dict_P1 = CreateObject("scripting.dictionary")
+Set PRB_Dict_P2 = CreateObject("scripting.dictionary")
+Set PRB_Dict_P3 = CreateObject("scripting.dictionary")
+Set PRB_Dict_P4andP5 = CreateObject("scripting.dictionary")
+Set PRB_Dict_total = CreateObject("scripting.dictionary")
+
 Dim today As Variant
 Dim DAlro As Long
 Dim i As Long
 Dim ticket_type As String
 Dim priority As Long
 Dim age_of_tkt As Variant
+Dim element As Long
 
 WS_CSS.Activate
 today = DateOfreport
@@ -70,8 +93,9 @@ WS_DA.Range("S2:S" & DAlro).Clear
 'Aging calculation logic
 For i = 2 To DAlro
 
-    'checking whether Actualfinish date is not empty and should be greater than date of report
-    If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(DateOfreport) Then
+    'Aging for Active tickets
+    'checking whether Actualfinish date is empty
+    If Cells(i, 25).Value = "" Then
         'checking whether Actual start date is not empty or not
         If Cells(i, 24).Value <> "" Then
                 'if Actual start date is empty then taking dufference between DateOfreport and Actualstartdate
@@ -83,25 +107,49 @@ For i = 2 To DAlro
             End If
         End If
     Else
-        'if Actualfinish date empty aging is empty
-        Cells(i, 19).Value = ""
+        'Aging for resolved tickets
+        'checking whether Actualfinish date is not empty and should be greater than date of report
+        If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(DateOfreport) Then
+        'checking whether Actual start date is not empty or not
+            If Cells(i, 24).Value <> "" Then
+                'if Actual start date is empty then taking dufference between DateOfreport and Actualstartdate
+                Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 24).Value
+            Else
+            'if Actual start date is empty then taking the difference between DateOfreport and Creation date
+                If Cells(i, 24).Value = "" Then
+                    Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
+                End If
+            End If
+        End If
     End If
 Next i
 
 '------------Counting aging based on team, ticket type and priority-----------------
 For i = 2 To DAlro
     
+    If i = 297 Then
+        Debug.Print i
+    End If
      'comparing team between maindata team and the parameter team for teamwise aging calculation
      If Cells(i, 8).Value = team Then
              
         ticket_type = Cells(i, 1).Value
         priority = Cells(i, 12).Value
         age_of_tkt = Cells(i, 19).Value
+        element = Cells(i, 19).Value
 
         Select Case ticket_type
             Case "INC":
                 Select Case priority
                     Case 1:
+                            If Cells(i, 25).Value <> "" Then
+                                If INC_Dict_P1.Exists(element) Then
+                                    INC_Dict_P1.Item(element) = INC_Dict_P1.Item(element) + 1
+                                Else
+                                    INC_Dict_P1.Add element, 1
+                                End If
+                            End If
+                    
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(0) = Days0_1_INC(0) + 1
@@ -134,6 +182,14 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                          If Cells(i, 25).Value <> "" Then
+                                If INC_Dict_P2.Exists(element) Then
+                                    INC_Dict_P2.Item(element) = INC_Dict_P2.Item(element) + 1
+                                Else
+                                    INC_Dict_P2.Add element, 1
+                                End If
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(1) = Days0_1_INC(1) + 1
@@ -167,6 +223,14 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            If Cells(i, 25).Value <> "" Then
+                                If INC_Dict_P3.Exists(element) Then
+                                    INC_Dict_P3.Item(element) = INC_Dict_P3.Item(element) + 1
+                                Else
+                                    INC_Dict_P3.Add element, 1
+                                End If
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(2) = Days0_1_INC(2) + 1
@@ -200,6 +264,14 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
+                            If Cells(i, 25).Value <> "" Then
+                            If INC_Dict_P4andP5.Exists(element) Then
+                                INC_Dict_P4andP5.Item(element) = INC_Dict_P4andP5.Item(element) + 1
+                            Else
+                                INC_Dict_P4andP5.Add element, 1
+                            End If
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(3) = Days0_1_INC(3) + 1
@@ -236,6 +308,12 @@ For i = 2 To DAlro
             Case "SRQ":
                 Select Case priority
                     Case 1:
+                            If SRQ_Dict_P1.Exists(element) Then
+                                SRQ_Dict_P1.Item(element) = SRQ_Dict_P1.Item(element) + 1
+                            Else
+                                SRQ_Dict_P1.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(0) = Days0_1_SRQ(0) + 1
@@ -268,6 +346,12 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                            If SRQ_Dict_P2.Exists(element) Then
+                                SRQ_Dict_P2.Item(element) = SRQ_Dict_P2.Item(element) + 1
+                            Else
+                                SRQ_Dict_P2.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(1) = Days0_1_SRQ(1) + 1
@@ -301,6 +385,12 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            If SRQ_Dict_P3.Exists(element) Then
+                                SRQ_Dict_P3.Item(element) = SRQ_Dict_P3.Item(element) + 1
+                            Else
+                                SRQ_Dict_P3.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(2) = Days0_1_SRQ(2) + 1
@@ -334,6 +424,13 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
+                            If SRQ_Dict_P4andP5.Exists(element) Then
+                                SRQ_Dict_P4andP5.Item(element) = SRQ_Dict_P4andP5.Item(element) + 1
+                            Else
+                                SRQ_Dict_P4andP5.Add element, 1
+                            End If
+                            
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(3) = Days0_1_SRQ(3) + 1
@@ -369,6 +466,12 @@ For i = 2 To DAlro
             Case "PRB":
                 Select Case priority
                     Case 1:
+                            If PRB_Dict_P1.Exists(element) Then
+                                PRB_Dict_P1.Item(element) = PRB_Dict_P1.Item(element) + 1
+                            Else
+                                PRB_Dict_P1.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(0) = Days0_1_PRB(0) + 1
@@ -401,6 +504,12 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                            If PRB_Dict_P2.Exists(element) Then
+                                PRB_Dict_P2.Item(element) = PRB_Dict_P2.Item(element) + 1
+                            Else
+                                PRB_Dict_P2.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(1) = Days0_1_PRB(1) + 1
@@ -435,6 +544,12 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            If PRB_Dict_P3.Exists(element) Then
+                                PRB_Dict_P3.Item(element) = PRB_Dict_P3.Item(element) + 1
+                            Else
+                                PRB_Dict_P3.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(2) = Days0_1_PRB(2) + 1
@@ -468,6 +583,13 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
+                            
+                            If PRB_Dict_P4andP5.Exists(element) Then
+                                PRB_Dict_P4andP5.Item(element) = PRB_Dict_P4andP5.Item(element) + 1
+                            Else
+                                PRB_Dict_P4andP5.Add element, 1
+                            End If
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(3) = Days0_1_PRB(3) + 1
@@ -503,9 +625,19 @@ For i = 2 To DAlro
         End Select
      End If
 Next i
+
+Dim highestVal As Integer, s As Integer
+    For Each j In INC_Dict_P3.Keys
+    Debug.Print INC_Dict_P3(j)
+        If INC_Dict_P3(j) > highestVal Then
+            highestVal = INC_Dict_P3(j)
+            s = j
+        End If
+    Next j
 '------------Counting aging based on team, ticket type and priority-----------------
 
 WS_CSS.Select
+
 'values insertion to the respective cells in the dashboard
 '----------Incident----------
 Range("D14:G14").Value = Days0_1_INC
@@ -1088,6 +1220,8 @@ For i = 2 To DAlro
                 End Select
         End Select
 Next i
+
+    
 '------------Counting aging based on team, ticket type and priority-----------------
 
 WS_CSS.Select
