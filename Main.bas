@@ -15,6 +15,9 @@ Attribute VB_Name = "Main"
     Public quarters(14, 1) As Variant
     'This is the no. of quarters
     Public c As Integer
+    
+    'Date of report
+    Public DateOfreport As Date
 
     Public StartTime As Double
     Public SecondsElapsed As Double
@@ -39,6 +42,9 @@ Sub pOpenApp()
     Set WS_RD = WB.Sheets("Raw Data")
     Set WS_HM = WB.Sheets("Home")
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
+    
+    'Date of report taking from Home sheet in L column
+     DateOfreport = WS_HM.Cells(5, 12).Value
 
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
@@ -121,17 +127,22 @@ DAlro = WS_DA.Cells(WS_DA.Rows.Count, "V").End(xlUp).Row
 a = 0
 For i = 2 To DAlro
     WS_DA.Activate
-    Call agingCount(team)
+    Call pCleanDB
     'getting team name from main data
-    team = Cells(i, 22).Value
+    team = WS_DA.Cells(i, 22).Value
+    Call agingCount(team)
+  
     'generating the dashboard for each team and quarterwise
-    For j = 0 To c
-        Call ticketCount(team, j)
-    Next j
+'    For j = 0 To c
+'        Call ticketCount(team, j)
+'    Next j
     'replicating the team's dashboard
     Call ReplicateMainSheet(team)
-    a = a + 1
+    
 Next i
+
+  Call pCleanDB
+  Call agingCountForAll
 
 End Sub
 
