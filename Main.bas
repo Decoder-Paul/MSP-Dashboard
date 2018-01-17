@@ -15,6 +15,9 @@ Attribute VB_Name = "Main"
     Public quarters(14, 1) As Variant
     'This is the no. of quarters
     Public c As Integer
+    
+    'Date of report
+    Public DateOfreport As Date
 
     Public StartTime As Double
     Public SecondsElapsed As Double
@@ -39,6 +42,9 @@ Sub pOpenApp()
     Set WS_RD = WB.Sheets("Raw Data")
     Set WS_HM = WB.Sheets("Home")
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
+    
+    'Date of report taking from Home sheet in L column
+     DateOfreport = WS_HM.Cells(5, 12).Value
 
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
@@ -142,6 +148,9 @@ Sub teamsDashboard()
         WS_CSS.Range("D34:W48").ClearContents
     
     Next i
+
+  Call pCleanDB
+  Call agingCountForAll
 
 End Sub
 
