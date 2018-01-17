@@ -7,9 +7,10 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 ' Purpose   :   To get no. of Tickets depending on conditions from Data File to Dashboard .
 '
 ' Author    :   Subhankar Paul, 11th January, 2018
-' Notes     :   Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant
-'               4 parameters are calculated at the end of the count are
-'               Avg Effort, ResponseSLA %, ResolutionSLA % & Avg Closure Duration
+' Notes     :   . Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant
+'               . 4 parameters are calculated at the end of the count are
+'                 Avg Effort, ResponseSLA %, ResolutionSLA % & Avg Closure Duration
+'               . The value placement in Excel Cells are flexible with versions
 ' Parameter :   team,v - team and quarter wise the procedure will be called repeatedly, v is the row no. of
 '               quarter array
 ' Returns   :   N/A
@@ -875,58 +876,76 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
         avgClosure_Prb(i) = cloDur_Prb(i) / closed_Prb(i)
         
     Next i
-    '------------------ Value Placement of the Variable in Excel sheet versionwise -------------
+    
+    'Checking Whether Dictionary contains Blank String
+    If INC_Dict.Exists("") Then
+        tmSize_Inc = INC_Dict.Count - 1
+    End If
+    If SRQ_Dict.Exists("") Then
+        tmSize_Srq = SRQ_Dict.Count - 1
+    End If
+    If CHG_Dict.Exists("") Then
+        tmSize_Chg = CHG_Dict.Count - 1
+    End If
+    If PRB_Dict.Exists("") Then
+        tmSize_Prb = PRB_Dict.Count - 1
+    End If
+    
+    
+    WS_CSS.Select
+    
+    '------------------ VERSIONWISE Value Placement of the Variable in Excel sheet -------------
     '----------Incident----------
     Range("D" & 34 + 15 * v & ":H" & 34 + 15 * v).Value = opnBal_Inc
-    Range("D35:H35").Value = recvd_Inc
-    Range("D36:H36").Value = carried_Inc
-    Range("D37:H37").Value = closed_Inc
-    Range("D38:H38").Value = reOpen_Inc
-    Range("D39:H39").Value = totEff_Inc
-    Range("D40:H40").Value = avgEff_Inc
-    Cells(41, 4).Value = tmSize_Inc
-    Range("D44:H44").Value = rspSla_Inc
-    Range("D45:H45").Value = rspSlaPrcnt_Inc
-    Range("D46:H46").Value = resSla_Inc
-    Range("D47:H47").Value = resSlaPrcnt_Inc
-    Range("D48:H48").Value = avgClosure_Inc
+    Range("D" & 35 + 15 * v & ":H" & 35 + 15 * v).Value = recvd_Inc
+    Range("D" & 36 + 15 * v & ":H" & 36 + 15 * v).Value = carried_Inc
+    Range("D" & 37 + 15 * v & ":H" & 37 + 15 * v).Value = closed_Inc
+    Range("D" & 38 + 15 * v & ":H" & 38 + 15 * v).Value = reOpen_Inc
+    Range("D" & 39 + 15 * v & ":H" & 39 + 15 * v).Value = totEff_Inc
+    Range("D" & 40 + 15 * v & ":H" & 40 + 15 * v).Value = avgEff_Inc
+    Cells(41 + 15 * v, 4).Value = tmSize_Inc
+    Range("D" & 44 + 15 * v & ":H" & 44 + 15 * v).Value = rspSla_Inc
+    Range("D" & 45 + 15 * v & ":H" & 45 + 15 * v).Value = rspSlaPrcnt_Inc
+    Range("D" & 46 + 15 * v & ":H" & 46 + 15 * v).Value = resSla_Inc
+    Range("D" & 47 + 15 * v & ":H" & 47 + 15 * v).Value = resSlaPrcnt_Inc
+    Range("D" & 48 + 15 * v & ":H" & 48 + 15 * v).Value = avgClosure_Inc
     '----------Service Request----------
-    Range("I34:M34").Value = opnBal_Srq
-    Range("I35:M35").Value = recvd_Srq
-    Range("I36:M36").Value = carried_Srq
-    Range("I37:M37").Value = closed_Srq
-    Range("I38:M38").Value = reOpen_Srq
-    Range("I39:M39").Value = totEff_Srq
-    Range("I40:M40").Value = avgEff_Srq
-    Cells(41, 9).Value = tmSize_Srq
-    Range("I44:M44").Value = rspSla_Srq
-    Range("I45:M45").Value = rspSlaPrcnt_Srq
-    Range("I46:M46").Value = resSla_Srq
-    Range("I47:M47").Value = resSlaPrcnt_Srq
-    Range("I48:M48").Value = avgClosure_Srq
+    Range("I" & 34 + 15 * v & ":M" & 34 + 15 * v).Value = opnBal_Srq
+    Range("I" & 35 + 15 * v & ":M" & 35 + 15 * v).Value = recvd_Srq
+    Range("I" & 36 + 15 * v & ":M" & 36 + 15 * v).Value = carried_Srq
+    Range("I" & 37 + 15 * v & ":M" & 37 + 15 * v).Value = closed_Srq
+    Range("I" & 38 + 15 * v & ":M" & 38 + 15 * v).Value = reOpen_Srq
+    Range("I" & 39 + 15 * v & ":M" & 39 + 15 * v).Value = totEff_Srq
+    Range("I" & 40 + 15 * v & ":M" & 40 + 15 * v).Value = avgEff_Srq
+    Cells(41 + 15 * v, 9).Value = tmSize_Srq
+    Range("I" & 44 + 15 * v & ":M" & 44 + 15 * v).Value = rspSla_Srq
+    Range("I" & 45 + 15 * v & ":M" & 45 + 15 * v).Value = rspSlaPrcnt_Srq
+    Range("I" & 46 + 15 * v & ":M" & 46 + 15 * v).Value = resSla_Srq
+    Range("I" & 47 + 15 * v & ":M" & 47 + 15 * v).Value = resSlaPrcnt_Srq
+    Range("I" & 48 + 15 * v & ":M" & 48 + 15 * v).Value = avgClosure_Srq
     '----------Problem----------
-    Range("N34:R34").Value = opnBal_Prb
-    Range("N35:R35").Value = recvd_Prb
-    Range("N36:R36").Value = carried_Prb
-    Range("N37:R37").Value = closed_Prb
-    Range("N38:R38").Value = reOpen_Prb
-    Range("N39:R39").Value = totEff_Prb
-    Range("N40:R40").Value = avgEff_Prb
-    Cells(41, 14).Value = tmSize_Prb
-    Range("N44:R44").Value = rspSla_Prb
-    Range("N45:R45").Value = rspSlaPrcnt_Prb
-    Range("N46:R46").Value = resSla_Prb
-    Range("N47:R47").Value = resSlaPrcnt_Prb
-    Range("N48:R48").Value = avgClosure_Prb
+    Range("N" & 34 + 15 * v & ":R" & 34 + 15 * v).Value = opnBal_Prb
+    Range("N" & 35 + 15 * v & ":R" & 35 + 15 * v).Value = recvd_Prb
+    Range("N" & 36 + 15 * v & ":R" & 36 + 15 * v).Value = carried_Prb
+    Range("N" & 37 + 15 * v & ":R" & 37 + 15 * v).Value = closed_Prb
+    Range("N" & 38 + 15 * v & ":R" & 38 + 15 * v).Value = reOpen_Prb
+    Range("N" & 39 + 15 * v & ":R" & 39 + 15 * v).Value = totEff_Prb
+    Range("N" & 40 + 15 * v & ":R" & 40 + 15 * v).Value = avgEff_Prb
+    Cells(41 + 15 * v, 14).Value = tmSize_Prb
+    Range("N" & 44 + 15 * v & ":R" & 44 + 15 * v).Value = rspSla_Prb
+    Range("N" & 45 + 15 * v & ":R" & 45 + 15 * v).Value = rspSlaPrcnt_Prb
+    Range("N" & 46 + 15 * v & ":R" & 46 + 15 * v).Value = resSla_Prb
+    Range("N" & 47 + 15 * v & ":R" & 47 + 15 * v).Value = resSlaPrcnt_Prb
+    Range("N" & 48 + 15 * v & ":R" & 48 + 15 * v).Value = avgClosure_Prb
     '----------Change Req----------
-    Range("S34:W34").Value = opnBal_Chg
-    Range("S35:W35").Value = recvd_Chg
-    Range("S36:W36").Value = carried_Chg
-    Range("S37:W37").Value = closed_Chg
-    Range("S38:W38").Value = reOpen_Chg
-    Range("S39:W39").Value = totEff_Chg
-    Range("S40:W40").Value = avgEff_Chg
-    Cells(41, 19).Value = tmSize_Chg
-    Range("S42:W42").Value = winMiss_Chg
-    Range("S43:W43").Value = winMissPrcnt_Chg
+    Range("S" & 34 + 15 * v & ":W" & 34 + 15 * v).Value = opnBal_Chg
+    Range("S" & 35 + 15 * v & ":W" & 35 + 15 * v).Value = recvd_Chg
+    Range("S" & 36 + 15 * v & ":W" & 36 + 15 * v).Value = carried_Chg
+    Range("S" & 37 + 15 * v & ":W" & 37 + 15 * v).Value = closed_Chg
+    Range("S" & 38 + 15 * v & ":W" & 38 + 15 * v).Value = reOpen_Chg
+    Range("S" & 39 + 15 * v & ":W" & 39 + 15 * v).Value = totEff_Chg
+    Range("S" & 40 + 15 * v & ":W" & 40 + 15 * v).Value = avgEff_Chg
+    Cells(41 + 15 * v, 19).Value = tmSize_Chg
+    Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
+    Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
 End Sub
