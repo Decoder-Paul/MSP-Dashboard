@@ -60,7 +60,7 @@ Sub pOpenApp()
     
     Call teamsDashboard
     
-     
+    Call pCloseApp
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
     ' Determine how many seconds this code will take to run

@@ -132,9 +132,10 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         '------------------ Filtering Data for Quarter ----------------------
                         'Opening balance: finish date = "" and create Date <= Start Date
                         If createDate < startDate Then
-                            'Carried Forward & Opening Balance:
+                            'Opening Balance:
+                            opnBal_Inc(0) = opnBal_Inc(0) + 1
+                            'CarryForward
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Inc(0) = opnBal_Inc(0) + 1
                                 carried_Inc(0) = carried_Inc(0) + 1
                             'Resolved: end_Date >= 'Finish Date' >= start_Date
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
@@ -176,8 +177,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 2
                         If createDate < startDate Then
+                            opnBal_Inc(1) = opnBal_Inc(1) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Inc(1) = opnBal_Inc(1) + 1
                                 carried_Inc(1) = carried_Inc(1) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Inc(1) = closed_Inc(1) + 1
@@ -208,8 +209,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 3
                         If createDate < startDate Then
+                            opnBal_Inc(2) = opnBal_Inc(2) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Inc(2) = opnBal_Inc(2) + 1
                                 carried_Inc(2) = carried_Inc(2) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Inc(2) = closed_Inc(2) + 1
@@ -240,8 +241,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 4
                         If createDate < startDate Then
+                            opnBal_Inc(3) = opnBal_Inc(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Inc(3) = opnBal_Inc(3) + 1
                                 carried_Inc(3) = carried_Inc(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Inc(3) = closed_Inc(3) + 1
@@ -273,8 +274,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 '************* Case 4 and Case 5 both sharing same variables ***************
                     Case 5
                         If createDate < startDate Then
+                            opnBal_Inc(3) = opnBal_Inc(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Inc(3) = opnBal_Inc(3) + 1
                                 carried_Inc(3) = carried_Inc(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Inc(3) = closed_Inc(3) + 1
@@ -318,8 +319,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         'Opening balance: finish date = "" and create Date <= Start Date
                         If createDate < startDate Then
                             'Carried Forward & Opening Balance:
+                            opnBal_Srq(0) = opnBal_Srq(0) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Srq(0) = opnBal_Srq(0) + 1
                                 carried_Srq(0) = carried_Srq(0) + 1
                             'Resolved: end_Date >= 'Finish Date' >= start_Date
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
@@ -361,8 +362,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 2
                         If createDate < startDate Then
+                            opnBal_Srq(1) = opnBal_Srq(1) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Srq(1) = opnBal_Srq(1) + 1
                                 carried_Srq(1) = carried_Srq(1) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Srq(1) = closed_Srq(1) + 1
@@ -393,8 +394,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 3
                         If createDate < startDate Then
+                            opnBal_Srq(2) = opnBal_Srq(2) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Srq(2) = opnBal_Srq(2) + 1
                                 carried_Srq(2) = carried_Srq(2) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Srq(2) = closed_Srq(2) + 1
@@ -412,7 +413,7 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                             If reOpnd = "Y" Then
                                 reOpen_Srq(2) = reOpen_Srq(2) + 1
                             End If
-                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                            If CStr(finishDate) = o Or finishDate > endDate Then
                                 carried_Srq(2) = carried_Srq(2) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Srq(2) = closed_Srq(2) + 1
@@ -425,8 +426,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 4
                         If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Srq(3) = opnBal_Srq(3) + 1
                                 carried_Srq(3) = carried_Srq(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Srq(3) = closed_Srq(3) + 1
@@ -458,8 +459,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 '************* Case 4 and Case 5 both sharing same variables ***************
                     Case 5
                         If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Srq(3) = opnBal_Srq(3) + 1
                                 carried_Srq(3) = carried_Srq(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Srq(3) = closed_Srq(3) + 1
@@ -503,8 +504,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         'Opening balance: finish date = "" and create Date <= Start Date
                         If createDate < startDate Then
                             'Carried Forward & Opening Balance:
+                            opnBal_Prb(0) = opnBal_Prb(0) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Prb(0) = opnBal_Prb(0) + 1
                                 carried_Prb(0) = carried_Prb(0) + 1
                             'Resolved: end_Date >= 'Finish Date' >= start_Date
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
@@ -546,8 +547,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 2
                         If createDate < startDate Then
+                            opnBal_Prb(1) = opnBal_Prb(1) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Prb(1) = opnBal_Prb(1) + 1
                                 carried_Prb(1) = carried_Prb(1) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Prb(1) = closed_Prb(1) + 1
@@ -578,8 +579,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 3
                         If createDate < startDate Then
+                            opnBal_Prb(2) = opnBal_Prb(2) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Prb(2) = opnBal_Prb(2) + 1
                                 carried_Prb(2) = carried_Prb(2) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Prb(2) = closed_Prb(2) + 1
@@ -610,8 +611,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 4
                         If createDate < startDate Then
+                            opnBal_Prb(3) = opnBal_Prb(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Prb(3) = opnBal_Prb(3) + 1
                                 carried_Prb(3) = carried_Prb(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Prb(3) = closed_Prb(3) + 1
@@ -643,8 +644,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 '************* Case 4 and Case 5 both sharing same variables ***************
                     Case 5
                         If createDate < startDate Then
+                            opnBal_Prb(3) = opnBal_Prb(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Prb(3) = opnBal_Prb(3) + 1
                                 carried_Prb(3) = carried_Prb(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Prb(3) = closed_Prb(3) + 1
@@ -688,8 +689,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         'Opening balance: finish date = "" and create Date <= Start Date
                         If createDate < startDate Then
                             'Carried Forward & Opening Balance:
+                            opnBal_Chg(0) = opnBal_Chg(0) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Chg(0) = opnBal_Chg(0) + 1
                                 carried_Chg(0) = carried_Chg(0) + 1
                             'Resolved: end_Date >= 'Finish Date' >= start_Date
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
@@ -719,8 +720,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 2
                         If createDate < startDate Then
+                            opnBal_Chg(1) = opnBal_Chg(1) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Chg(1) = opnBal_Chg(1) + 1
                                 carried_Chg(1) = carried_Chg(1) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Chg(1) = closed_Chg(1) + 1
@@ -743,8 +744,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 3
                         If createDate < startDate Then
+                            opnBal_Chg(2) = opnBal_Chg(2) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Chg(2) = opnBal_Chg(2) + 1
                                 carried_Chg(2) = carried_Chg(2) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Chg(2) = closed_Chg(2) + 1
@@ -767,8 +768,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
                         End If
                     Case 4
                         If createDate < startDate Then
+                            opnBal_Chg(3) = opnBal_Chg(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Chg(3) = opnBal_Chg(3) + 1
                                 carried_Chg(3) = carried_Chg(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Chg(3) = closed_Chg(3) + 1
@@ -792,8 +793,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
 '************* Case 4 and Case 5 both sharing same variables ***************
                     Case 5
                         If createDate < startDate Then
+                            opnBal_Chg(3) = opnBal_Chg(3) + 1
                             If CStr(finishDate) = "" Or finishDate > endDate Then
-                                opnBal_Chg(3) = opnBal_Chg(3) + 1
                                 carried_Chg(3) = carried_Chg(3) + 1
                             ElseIf finishDate >= startDate And finishDate <= endDate Then
                                 closed_Chg(3) = closed_Chg(3) + 1
@@ -962,10 +963,12 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Cells(41 + 15 * v, 19).Value = tmSize_Chg
     Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
     Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
+    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & " - " & quarters(v, 1)
+    
 End Sub
 Sub ticketCountAll(ByVal v As Integer)
 '========================================================================================================
-' TicketCount
+' TicketCountAll
 ' -------------------------------------------------------------------------------------------------------
 ' Purpose   :   To get no. of Tickets depending on conditions from Data File to Dashboard .
 '
@@ -1072,711 +1075,712 @@ Sub ticketCountAll(ByVal v As Integer)
     Data_rowCount = ActiveSheet.Cells(Rows.Count, "A").End(xlUp).Row
 
     For Data_i = 2 To Data_rowCount
-        tkt_type = Cells(Data_i, 1).Value ' Ticket Type
-        prty = Cells(Data_i, 12).Value ' Priority
-        createDate = Cells(Data_i, 23).Value
-        finishDate = Cells(Data_i, 25).Value
-        reOpnd = Cells(Data_i, 18).Value
-        rspSLA = Cells(Data_i, 2).Value
-        resSLA = Cells(Data_i, 3).Value
-        Select Case tkt_type
-            'If Incident ticket type
-            Case "INC"
-                If INC_Dict.Exists(element) Then
-                    INC_Dict.Item(element) = INC_Dict.Item(element) + 1
-                Else
-                    INC_Dict.Add element, 1
-                End If
-            Select Case prty
-                'Priority 1 and so on same for below also
-                Case 1
-                    '------------------ Filtering Data for Quarter ----------------------
-                    'Opening balance: finish date = "" and create Date <= Start Date
-                    If createDate < startDate Then
-                        'Carried Forward & Opening Balance:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+            tkt_type = Cells(Data_i, 1).Value ' Ticket Type
+            prty = Cells(Data_i, 12).Value ' Priority
+            createDate = Cells(Data_i, 23).Value
+            finishDate = Cells(Data_i, 25).Value
+            reOpnd = Cells(Data_i, 18).Value
+            rspSLA = Cells(Data_i, 2).Value
+            resSLA = Cells(Data_i, 3).Value
+            Select Case tkt_type
+                'If Incident ticket type
+                Case "INC"
+                    If INC_Dict.Exists(element) Then
+                        INC_Dict.Item(element) = INC_Dict.Item(element) + 1
+                    Else
+                        INC_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Opening Balance:
                             opnBal_Inc(0) = opnBal_Inc(0) + 1
-                            carried_Inc(0) = carried_Inc(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(0) = closed_Inc(0) + 1
-                            'Total Effort Spent
-                            totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
-                            'Total Closure Duration
-                            cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                'Total Resolution SLA Breached
-                                resSla_Inc(0) = resSla_Inc(0) + 1
+                            'CarryForward
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(0) = recvd_Inc(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Inc(0) = rspSla_Inc(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(0) = reOpen_Inc(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
                             End If
                         End If
-                    'Received: end_Date >= 'Create Date' >= start_Date
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Inc(0) = recvd_Inc(0) + 1
-                        If rspSLA = "N" Then
-                            'Total Response SLA Breached
-                            rspSla_Inc(0) = rspSla_Inc(0) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Inc(0) = reOpen_Inc(0) + 1
-                        End If
-                        'Carried Forward:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Inc(0) = carried_Inc(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(0) = closed_Inc(0) + 1
-                            'Total Effort Spent
-                            totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
-                            'Total Closure Duration
-                            cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                'Total Resolution SLA Breached
-                                resSla_Inc(0) = resSla_Inc(0) + 1
-                            End If
-                        End If
-                    End If
-                Case 2
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 2
+                        If createDate < startDate Then
                             opnBal_Inc(1) = opnBal_Inc(1) + 1
-                            carried_Inc(1) = carried_Inc(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(1) = closed_Inc(1) + 1
-                            totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
-                            cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(1) = resSla_Inc(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(1) = carried_Inc(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(1) = closed_Inc(1) + 1
+                                totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
+                                cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(1) = resSla_Inc(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(1) = recvd_Inc(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(1) = rspSla_Inc(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(1) = reOpen_Inc(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(1) = carried_Inc(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(1) = closed_Inc(1) + 1
+                                totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
+                                cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(1) = resSla_Inc(1) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Inc(1) = recvd_Inc(1) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Inc(1) = rspSla_Inc(1) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Inc(1) = reOpen_Inc(1) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Inc(1) = carried_Inc(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(1) = closed_Inc(1) + 1
-                            totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
-                            cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(1) = resSla_Inc(1) + 1
-                            End If
-                        End If
-                    End If
-                Case 3
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 3
+                        If createDate < startDate Then
                             opnBal_Inc(2) = opnBal_Inc(2) + 1
-                            carried_Inc(2) = carried_Inc(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(2) = closed_Inc(2) + 1
-                            totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
-                            cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(2) = resSla_Inc(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(2) = carried_Inc(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(2) = closed_Inc(2) + 1
+                                totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
+                                cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(2) = resSla_Inc(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(2) = recvd_Inc(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(2) = rspSla_Inc(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(2) = reOpen_Inc(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(2) = carried_Inc(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(2) = closed_Inc(2) + 1
+                                totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
+                                cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(2) = resSla_Inc(2) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Inc(2) = recvd_Inc(2) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Inc(2) = rspSla_Inc(2) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Inc(2) = reOpen_Inc(2) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Inc(2) = carried_Inc(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(2) = closed_Inc(2) + 1
-                            totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
-                            cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(2) = resSla_Inc(2) + 1
-                            End If
-                        End If
-                    End If
-                Case 4
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 4
+                        If createDate < startDate Then
                             opnBal_Inc(3) = opnBal_Inc(3) + 1
-                            carried_Inc(3) = carried_Inc(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(3) = closed_Inc(3) + 1
-                            totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
-                            cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(3) = resSla_Inc(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(3) = recvd_Inc(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(3) = rspSla_Inc(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(3) = reOpen_Inc(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Inc(3) = recvd_Inc(3) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Inc(3) = rspSla_Inc(3) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Inc(3) = reOpen_Inc(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Inc(3) = carried_Inc(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(3) = closed_Inc(3) + 1
-                            totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
-                            cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(3) = resSla_Inc(3) + 1
-                            End If
-                        End If
-                    End If
 '************* Case 4 and Case 5 both sharing same variables ***************
-                Case 5
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 5
+                        If createDate < startDate Then
                             opnBal_Inc(3) = opnBal_Inc(3) + 1
-                            carried_Inc(3) = carried_Inc(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(3) = closed_Inc(3) + 1
-                            totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
-                            cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(3) = resSla_Inc(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(3) = recvd_Inc(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(3) = rspSla_Inc(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(3) = reOpen_Inc(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Inc(3) = recvd_Inc(3) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Inc(3) = rspSla_Inc(3) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Inc(3) = reOpen_Inc(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Inc(3) = carried_Inc(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Inc(3) = closed_Inc(3) + 1
-                            totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
-                            cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Inc(3) = resSla_Inc(3) + 1
-                            End If
-                        End If
-                    End If
-            End Select
-'If ticket type = SRQ
-            Case "SRQ"
-                If SRQ_Dict.Exists(element) Then
-                    SRQ_Dict.Item(element) = SRQ_Dict.Item(element) + 1
-                Else
-                    SRQ_Dict.Add element, 1
-                End If
-            Select Case prty
-                'Priority 1 and so on same for below also
-                Case 1
-                    '------------------ Filtering Data for Quarter ----------------------
-                    'Opening balance: finish date = "" and create Date <= Start Date
-                    If createDate < startDate Then
-                        'Carried Forward & Opening Balance:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            opnBal_Srq(0) = opnBal_Srq(0) + 1
-                            carried_Srq(0) = carried_Srq(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(0) = closed_Srq(0) + 1
-                            'Total Effort Spent
-                            totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
-                            'Total Closure Duration
-                            cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                'Total Resolution SLA Breached
-                                resSla_Srq(0) = resSla_Srq(0) + 1
-                            End If
-                        End If
-                    'Received: end_Date >= 'Create Date' >= start_Date
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Srq(0) = recvd_Srq(0) + 1
-                        If rspSLA = "N" Then
-                            'Total Response SLA Breached
-                            rspSla_Srq(0) = rspSla_Srq(0) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Srq(0) = reOpen_Srq(0) + 1
-                        End If
-                        'Carried Forward:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Srq(0) = carried_Srq(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(0) = closed_Srq(0) + 1
-                            'Total Effort Spent
-                            totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
-                            'Total Closure Duration
-                            cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                'Total Resolution SLA Breached
-                                resSla_Srq(0) = resSla_Srq(0) + 1
-                            End If
-                        End If
-                    End If
-                Case 2
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            opnBal_Srq(1) = opnBal_Srq(1) + 1
-                            carried_Srq(1) = carried_Srq(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(1) = closed_Srq(1) + 1
-                            totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
-                            cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(1) = resSla_Srq(1) + 1
-                            End If
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Srq(1) = recvd_Srq(1) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Srq(1) = rspSla_Srq(1) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Srq(1) = reOpen_Srq(1) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Srq(1) = carried_Srq(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(1) = closed_Srq(1) + 1
-                            totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
-                            cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(1) = resSla_Srq(1) + 1
-                            End If
-                        End If
-                    End If
-                Case 3
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            opnBal_Srq(2) = opnBal_Srq(2) + 1
-                            carried_Srq(2) = carried_Srq(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(2) = closed_Srq(2) + 1
-                            totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
-                            cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(2) = resSla_Srq(2) + 1
-                            End If
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Srq(2) = recvd_Srq(2) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Srq(2) = rspSla_Srq(2) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Srq(2) = reOpen_Srq(2) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Srq(2) = carried_Srq(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(2) = closed_Srq(2) + 1
-                            totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
-                            cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(2) = resSla_Srq(2) + 1
-                            End If
-                        End If
-                    End If
-                Case 4
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            opnBal_Srq(3) = opnBal_Srq(3) + 1
-                            carried_Srq(3) = carried_Srq(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(3) = closed_Srq(3) + 1
-                            totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
-                            cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(3) = resSla_Srq(3) + 1
-                            End If
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Srq(3) = recvd_Srq(3) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Srq(3) = rspSla_Srq(3) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Srq(3) = reOpen_Srq(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Srq(3) = carried_Srq(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(3) = closed_Srq(3) + 1
-                            totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
-                            cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(3) = resSla_Srq(3) + 1
-                            End If
-                        End If
-                    End If
-'************* Case 4 and Case 5 both sharing same variables ***************
-                Case 5
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            opnBal_Srq(3) = opnBal_Srq(3) + 1
-                            carried_Srq(3) = carried_Srq(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(3) = closed_Srq(3) + 1
-                            totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
-                            cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(3) = resSla_Srq(3) + 1
-                            End If
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Srq(3) = recvd_Srq(3) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Srq(3) = rspSla_Srq(3) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Srq(3) = reOpen_Srq(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Srq(3) = carried_Srq(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Srq(3) = closed_Srq(3) + 1
-                            totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
-                            cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Srq(3) = resSla_Srq(3) + 1
-                            End If
-                        End If
-                    End If
                 End Select
+'If ticket type = SRQ
+                Case "SRQ"
+                    If SRQ_Dict.Exists(element) Then
+                        SRQ_Dict.Item(element) = SRQ_Dict.Item(element) + 1
+                    Else
+                        SRQ_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Srq(0) = opnBal_Srq(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(0) = carried_Srq(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(0) = closed_Srq(0) + 1
+                                'Total Effort Spent
+                                totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Srq(0) = resSla_Srq(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(0) = recvd_Srq(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Srq(0) = rspSla_Srq(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(0) = reOpen_Srq(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(0) = carried_Srq(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(0) = closed_Srq(0) + 1
+                                'Total Effort Spent
+                                totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Srq(0) = resSla_Srq(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Srq(1) = opnBal_Srq(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(1) = carried_Srq(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(1) = closed_Srq(1) + 1
+                                totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
+                                cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(1) = resSla_Srq(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(1) = recvd_Srq(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(1) = rspSla_Srq(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(1) = reOpen_Srq(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(1) = carried_Srq(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(1) = closed_Srq(1) + 1
+                                totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
+                                cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(1) = resSla_Srq(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Srq(2) = opnBal_Srq(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(2) = carried_Srq(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(2) = closed_Srq(2) + 1
+                                totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
+                                cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(2) = resSla_Srq(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(2) = recvd_Srq(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(2) = rspSla_Srq(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(2) = reOpen_Srq(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(2) = carried_Srq(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(2) = closed_Srq(2) + 1
+                                totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
+                                cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(2) = resSla_Srq(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(3) = recvd_Srq(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(3) = rspSla_Srq(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(3) = reOpen_Srq(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(3) = recvd_Srq(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(3) = rspSla_Srq(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(3) = reOpen_Srq(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        End If
+                    End Select
 'If ticket type = PRB
-            Case "PRB"
-                If PRB_Dict.Exists(element) Then
-                    PRB_Dict.Item(element) = PRB_Dict.Item(element) + 1
-                Else
-                    PRB_Dict.Add element, 1
-                End If
-            Select Case prty
-                'Priority 1 and so on same for below also
-                Case 1
-                    '------------------ Filtering Data for Quarter ----------------------
-                    'Opening balance: finish date = "" and create Date <= Start Date
-                    If createDate < startDate Then
-                        'Carried Forward & Opening Balance:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                Case "PRB"
+                    If PRB_Dict.Exists(element) Then
+                        PRB_Dict.Item(element) = PRB_Dict.Item(element) + 1
+                    Else
+                        PRB_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
                             opnBal_Prb(0) = opnBal_Prb(0) + 1
-                            carried_Prb(0) = carried_Prb(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(0) = closed_Prb(0) + 1
-                            'Total Effort Spent
-                            totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
-                            'Total Closure Duration
-                            cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                'Total Resolution SLA Breached
-                                resSla_Prb(0) = resSla_Prb(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(0) = carried_Prb(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(0) = closed_Prb(0) + 1
+                                'Total Effort Spent
+                                totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Prb(0) = resSla_Prb(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(0) = recvd_Prb(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Prb(0) = rspSla_Prb(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(0) = reOpen_Prb(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(0) = carried_Prb(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(0) = closed_Prb(0) + 1
+                                'Total Effort Spent
+                                totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Prb(0) = resSla_Prb(0) + 1
+                                End If
                             End If
                         End If
-                    'Received: end_Date >= 'Create Date' >= start_Date
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Prb(0) = recvd_Prb(0) + 1
-                        If rspSLA = "N" Then
-                            'Total Response SLA Breached
-                            rspSla_Prb(0) = rspSla_Prb(0) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Prb(0) = reOpen_Prb(0) + 1
-                        End If
-                        'Carried Forward:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Prb(0) = carried_Prb(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(0) = closed_Prb(0) + 1
-                            'Total Effort Spent
-                            totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
-                            'Total Closure Duration
-                            cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                'Total Resolution SLA Breached
-                                resSla_Prb(0) = resSla_Prb(0) + 1
-                            End If
-                        End If
-                    End If
-                Case 2
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 2
+                        If createDate < startDate Then
                             opnBal_Prb(1) = opnBal_Prb(1) + 1
-                            carried_Prb(1) = carried_Prb(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(1) = closed_Prb(1) + 1
-                            totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
-                            cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(1) = resSla_Prb(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(1) = carried_Prb(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(1) = closed_Prb(1) + 1
+                                totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
+                                cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(1) = resSla_Prb(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(1) = recvd_Prb(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(1) = rspSla_Prb(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(1) = reOpen_Prb(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(1) = carried_Prb(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(1) = closed_Prb(1) + 1
+                                totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
+                                cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(1) = resSla_Prb(1) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Prb(1) = recvd_Prb(1) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Prb(1) = rspSla_Prb(1) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Prb(1) = reOpen_Prb(1) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Prb(1) = carried_Prb(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(1) = closed_Prb(1) + 1
-                            totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
-                            cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(1) = resSla_Prb(1) + 1
-                            End If
-                        End If
-                    End If
-                Case 3
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 3
+                        If createDate < startDate Then
                             opnBal_Prb(2) = opnBal_Prb(2) + 1
-                            carried_Prb(2) = carried_Prb(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(2) = closed_Prb(2) + 1
-                            totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
-                            cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(2) = resSla_Prb(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(2) = carried_Prb(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(2) = closed_Prb(2) + 1
+                                totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
+                                cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(2) = resSla_Prb(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(2) = recvd_Prb(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(2) = rspSla_Prb(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(2) = reOpen_Prb(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(2) = carried_Prb(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(2) = closed_Prb(2) + 1
+                                totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
+                                cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(2) = resSla_Prb(2) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Prb(2) = recvd_Prb(2) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Prb(2) = rspSla_Prb(2) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Prb(2) = reOpen_Prb(2) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Prb(2) = carried_Prb(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(2) = closed_Prb(2) + 1
-                            totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
-                            cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(2) = resSla_Prb(2) + 1
-                            End If
-                        End If
-                    End If
-                Case 4
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 4
+                        If createDate < startDate Then
                             opnBal_Prb(3) = opnBal_Prb(3) + 1
-                            carried_Prb(3) = carried_Prb(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(3) = closed_Prb(3) + 1
-                            totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
-                            cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(3) = resSla_Prb(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(3) = recvd_Prb(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(3) = rspSla_Prb(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(3) = reOpen_Prb(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Prb(3) = recvd_Prb(3) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Prb(3) = rspSla_Prb(3) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Prb(3) = reOpen_Prb(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Prb(3) = carried_Prb(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(3) = closed_Prb(3) + 1
-                            totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
-                            cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(3) = resSla_Prb(3) + 1
-                            End If
-                        End If
-                    End If
 '************* Case 4 and Case 5 both sharing same variables ***************
-                Case 5
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 5
+                        If createDate < startDate Then
                             opnBal_Prb(3) = opnBal_Prb(3) + 1
-                            carried_Prb(3) = carried_Prb(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(3) = closed_Prb(3) + 1
-                            totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
-                            cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(3) = resSla_Prb(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(3) = recvd_Prb(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(3) = rspSla_Prb(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(3) = reOpen_Prb(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
                             End If
                         End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Prb(3) = recvd_Prb(3) + 1
-                        If rspSLA = "N" Then
-                            rspSla_Prb(3) = rspSla_Prb(3) + 1
-                        End If
-                        If reOpnd = "Y" Then
-                            reOpen_Prb(3) = reOpen_Prb(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Prb(3) = carried_Prb(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Prb(3) = closed_Prb(3) + 1
-                            totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
-                            cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
-                            If resSLA = "N" Then
-                                resSla_Prb(3) = resSla_Prb(3) + 1
-                            End If
-                        End If
+                End Select
+                'If ticket type = CHG
+                Case "ACT"
+                    If CHG_Dict.Exists(element) Then
+                        CHG_Dict.Item(element) = CHG_Dict.Item(element) + 1
+                    Else
+                        CHG_Dict.Add element, 1
                     End If
-            End Select
-            'If ticket type = CHG
-            Case "ACT"
-                If CHG_Dict.Exists(element) Then
-                    CHG_Dict.Item(element) = CHG_Dict.Item(element) + 1
-                Else
-                    CHG_Dict.Add element, 1
-                End If
-            Select Case prty
-                'Priority 1 and so on same for below also
-                Case 1
-                    '------------------ Filtering Data for Quarter ----------------------
-                    'Opening balance: finish date = "" and create Date <= Start Date
-                    If createDate < startDate Then
-                        'Carried Forward & Opening Balance:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
                             opnBal_Chg(0) = opnBal_Chg(0) + 1
-                            carried_Chg(0) = carried_Chg(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(0) = closed_Chg(0) + 1
-                            'Total Effort Spent
-                            totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
-                        End If
-                    'Received: end_Date >= 'Create Date' >= start_Date
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Chg(0) = recvd_Chg(0) + 1
-                        If reOpnd = "Y" Then
-                            reOpen_Chg(0) = reOpen_Chg(0) + 1
-                        End If
-                        'Carried Forward:
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Chg(0) = carried_Chg(0) + 1
-                        'Resolved: end_Date >= 'Finish Date' >= start_Date
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(0) = closed_Chg(0) + 1
-                            'Total Effort Spent
-                            totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
-                            'Change Window missed implemented
-                            If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
-                                winMiss_Chg(0) = winMiss_Chg(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(0) = carried_Chg(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(0) = closed_Chg(0) + 1
+                                'Total Effort Spent
+                                totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(0) = recvd_Chg(0) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(0) = reOpen_Chg(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(0) = carried_Chg(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(0) = closed_Chg(0) + 1
+                                'Total Effort Spent
+                                totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
+                                'Change Window missed implemented
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(0) = winMiss_Chg(0) + 1
+                                End If
                             End If
                         End If
-                    End If
-                Case 2
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 2
+                        If createDate < startDate Then
                             opnBal_Chg(1) = opnBal_Chg(1) + 1
-                            carried_Chg(1) = carried_Chg(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(1) = closed_Chg(1) + 1
-                            totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Chg(1) = recvd_Chg(1) + 1
-                        If reOpnd = "Y" Then
-                            reOpen_Chg(1) = reOpen_Chg(1) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Chg(1) = carried_Chg(1) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(1) = closed_Chg(1) + 1
-                            totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
-                            If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
-                                winMiss_Chg(1) = winMiss_Chg(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(1) = carried_Chg(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(1) = closed_Chg(1) + 1
+                                totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(1) = recvd_Chg(1) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(1) = reOpen_Chg(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(1) = carried_Chg(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(1) = closed_Chg(1) + 1
+                                totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(1) = winMiss_Chg(1) + 1
+                                End If
                             End If
                         End If
-                    End If
-                Case 3
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 3
+                        If createDate < startDate Then
                             opnBal_Chg(2) = opnBal_Chg(2) + 1
-                            carried_Chg(2) = carried_Chg(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(2) = closed_Chg(2) + 1
-                            totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Chg(2) = recvd_Chg(2) + 1
-                        If reOpnd = "Y" Then
-                            reOpen_Chg(2) = reOpen_Chg(2) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Chg(2) = carried_Chg(2) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(2) = closed_Chg(2) + 1
-                            totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
-                            If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
-                                winMiss_Chg(2) = winMiss_Chg(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(2) = carried_Chg(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(2) = closed_Chg(2) + 1
+                                totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(2) = recvd_Chg(2) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(2) = reOpen_Chg(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(2) = carried_Chg(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(2) = closed_Chg(2) + 1
+                                totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(2) = winMiss_Chg(2) + 1
+                                End If
                             End If
                         End If
-                    End If
-                Case 4
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 4
+                        If createDate < startDate Then
                             opnBal_Chg(3) = opnBal_Chg(3) + 1
-                            carried_Chg(3) = carried_Chg(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(3) = closed_Chg(3) + 1
-                            totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Chg(3) = recvd_Chg(3) + 1
-                        If reOpnd = "Y" Then
-                            reOpen_Chg(3) = reOpen_Chg(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Chg(3) = carried_Chg(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(3) = closed_Chg(3) + 1
-                            totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
-                            If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
-                                winMiss_Chg(3) = winMiss_Chg(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(3) = recvd_Chg(3) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(3) = reOpen_Chg(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(3) = winMiss_Chg(0) + 1
+                                End If
                             End If
                         End If
-                    End If
 '************* Case 4 and Case 5 both sharing same variables ***************
-                Case 5
-                    If createDate < startDate Then
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
+                    Case 5
+                        If createDate < startDate Then
                             opnBal_Chg(3) = opnBal_Chg(3) + 1
-                            carried_Chg(3) = carried_Chg(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(3) = closed_Chg(3) + 1
-                            totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
-                        End If
-                    ElseIf createDate >= startDate And finishDate <= endDate Then
-                        recvd_Chg(3) = recvd_Chg(3) + 1
-                        If reOpnd = "Y" Then
-                            reOpen_Chg(3) = reOpen_Chg(3) + 1
-                        End If
-                        If CStr(finishDate) = "" Or finishDate > endDate Then
-                            carried_Chg(3) = carried_Chg(3) + 1
-                        ElseIf finishDate >= startDate And finishDate <= endDate Then
-                            closed_Chg(3) = closed_Chg(3) + 1
-                            totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
-                            If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
-                                winMiss_Chg(3) = winMiss_Chg(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(3) = recvd_Chg(3) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(3) = reOpen_Chg(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(3) = winMiss_Chg(3) + 1
+                                End If
                             End If
                         End If
-                    End If
+                End Select
             End Select
-        End Select
     Next Data_i
     ' Total of the following variables are calculated
     For i = 0 To 3
@@ -1922,5 +1926,6 @@ Sub ticketCountAll(ByVal v As Integer)
     Cells(41 + 15 * v, 19).Value = tmSize_Chg
     Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
     Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
+    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & " - " & quarters(v, 1)
+    
 End Sub
-

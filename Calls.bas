@@ -107,3 +107,29 @@ End If
     Columns("S").ColumnWidth = 9
 
 End Sub
+Sub pCloseApp()
+'========================================================================================================
+' pCloseApp
+' -------------------------------------------------------------------------------------------------------
+' Purpose of this programm : To create a new sheet
+'
+' Author : Subhankar Paul 18th January, 2017
+' Notes  : N/A
+' Parameters : N/A
+' Returns : N/A
+' ---------------------------------------------------------------
+' Revision History
+'
+'========================================================================================================
+
+    'Hidding the File
+
+
+    WS_DA.Visible = xlSheetVeryHidden
+    WS_CSS.Activate
+    
+    Application.ScreenUpdating = True
+    Application.DisplayAlerts = True
+
+End Sub
+
