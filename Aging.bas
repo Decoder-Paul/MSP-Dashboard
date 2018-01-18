@@ -149,15 +149,9 @@ For i = 2 To DAlro
             Case "INC":
                 Select Case priority
                     Case 1:
-                            'closure count for resolved incident tickets
-                            If Cells(i, 25).Value <> "" Then
-                                If INC_Dict_P1.Exists(element) Then
-                                    INC_Dict_P1.Item(element) = INC_Dict_P1.Item(element) + 1
-                                Else
-                                    INC_Dict_P1.Add element, 1
-                                End If
-                            Else
-                    
+                            
+                            If Cells(i, 25).Value = "" Then
+                                                   
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(0) = Days0_1_INC(0) + 1
@@ -199,15 +193,10 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
+                            
                             End If
                     Case 2:
-                          If Cells(i, 25).Value <> "" Then
-                                If INC_Dict_P2.Exists(element) Then
-                                    INC_Dict_P2.Item(element) = INC_Dict_P2.Item(element) + 1
-                                Else
-                                    INC_Dict_P2.Add element, 1
-                                End If
-                          Else
+                          If Cells(i, 25).Value = "" Then
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -249,16 +238,11 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
+                            
                           End If
                           
                     Case 3:
                             If Cells(i, 25).Value <> "" Then
-                                If INC_Dict_P3.Exists(element) Then
-                                    INC_Dict_P3.Item(element) = INC_Dict_P3.Item(element) + 1
-                                Else
-                                    INC_Dict_P3.Add element, 1
-                                End If
-                            Else
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -300,17 +284,12 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
+                            
                             End If
                     
                     Case 4 And 5:
                             If Cells(i, 25).Value <> "" Then
-                                If INC_Dict_P4andP5.Exists(element) Then
-                                    INC_Dict_P4andP5.Item(element) = INC_Dict_P4andP5.Item(element) + 1
-                                Else
-                                    INC_Dict_P4andP5.Add element, 1
-                                End If
-                            Else
-                            
+             
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(3) = Days0_1_INC(3) + 1
@@ -351,6 +330,7 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
+                            
                             End If
                                 
                 End Select
@@ -358,13 +338,7 @@ For i = 2 To DAlro
                 Select Case priority
                     Case 1:
                             'closure count for resolved serice requests tickets
-                            If Cells(i, 25).Value <> "" Then
-                                If SRQ_Dict_P1.Exists(element) Then
-                                    SRQ_Dict_P1.Item(element) = SRQ_Dict_P1.Item(element) + 1
-                                Else
-                                    SRQ_Dict_P1.Add element, 1
-                                End If
-                            Else
+                            If Cells(i, 25).Value = "" Then
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -407,15 +381,11 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
+                            
                             End If
                     Case 2:
                             If Cells(i, 25).Value <> "" Then
-                                If SRQ_Dict_P2.Exists(element) Then
-                                    SRQ_Dict_P2.Item(element) = SRQ_Dict_P2.Item(element) + 1
-                                Else
-                                    SRQ_Dict_P2.Add element, 1
-                                End If
-                            Else
+    
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1726,7 +1696,6 @@ For i = 14 To 22
     Sum = Sum + Cells(i, 13).Value
 Next i
 Cells(23, 13).Value = Sum
-
 
 '--------Problem Statement--------
 Sum = 0
