@@ -80,10 +80,11 @@ If c > 1 And CSSlro > 48 Then
     'Selection and deletion of below dashboard except top
     Rows("49:" & CSSlro).Select
     Selection.Delete Shift:=xlUp
-    
+
+End If
     'Selection of top dashboard template and replicating based on the number of quarter
     Range("A34:W48").Select
-    Selection.AutoFill Destination:=Range("A34:W" & (48 + c * 15)), Type:=xlFillDefault
+    Selection.AutoFill Destination:=Range("A34:W" & (48 + (c - 1) * 15)), Type:=xlFillDefault
 
     'fixing row height and column width
     Rows("34:" & CSSlro).RowHeight = 30
@@ -94,7 +95,7 @@ If c > 1 And CSSlro > 48 Then
     Columns("C").ColumnWidth = 14
     Columns("S").ColumnWidth = 9
     
-End If
+
     
     'fixing row height and column width
     Rows("34:" & CSSlro).RowHeight = 30
