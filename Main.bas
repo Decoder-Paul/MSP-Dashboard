@@ -130,9 +130,9 @@ Sub teamsDashboard()
         team = Cells(i, 22).Value
         Call agingCount(team)
         'generating the dashboard for each team and quarterwise
-        For j = 0 To c
-            Call ticketCount(team, j)
-        Next j        
+'        For j = 0 To c
+'            Call ticketCount(team, j)
+'        Next j
         'replicating the team's dashboard
         Call ReplicateMainSheet(team)
         'cleansing of CSS sheet after replication
