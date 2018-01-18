@@ -44,7 +44,7 @@ Sub pOpenApp()
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
     
     'Date of report taking from Home sheet in L column
-     DateOfreport = WS_HM.Cells(5, 12).Value
+     DateOfreport = Date
 
     Application.ScreenUpdating = False
     Application.DisplayAlerts = False
@@ -60,7 +60,7 @@ Sub pOpenApp()
     
     Call teamsDashboard
     
-     
+    Call pCloseApp
     Application.ScreenUpdating = True
     Application.DisplayAlerts = True
     ' Determine how many seconds this code will take to run
