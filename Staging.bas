@@ -23,6 +23,8 @@ Dim DAlro As Long
 Dim R As Long
 Dim c As Long
 
+fSheetExists ("MainData")
+
 WS_DA.Activate
 
 DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row

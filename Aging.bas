@@ -80,9 +80,9 @@ For i = 2 To DAlro
             Cells(i, 19).Value = CLng(today) - Cells(i, 23).Value
     Else
         'Aging for resolved tickets
-        'checking whether Actualfinish date is not empty and should be greater than date of report
+        'checking whether Actualfinish date is not empty and greater than today
         If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(today) Then
-            'if Actual start date is empty then taking the difference between todays date and Creation date
+                'taking the difference between Actualfinish date and Creation date
                 Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
         End If
     End If
@@ -98,15 +98,15 @@ For i = 2 To DAlro
         priority = Cells(i, 12).Value
         age_of_tkt = Cells(i, 19).Value
         element = Cells(i, 19).Value
-
+        
+        If Cells(i, 25).Value = "" Then
+        
         Select Case ticket_type
             Case "INC":
                 Select Case priority
                     Case 1:
-                            
-                            If Cells(i, 25).Value = "" Then
                                                    
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(0) = Days0_1_INC(0) + 1
                                     'sum of aging count for the priority 1 of incident tickets
@@ -147,12 +147,9 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     Case 2:
-                          If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(1) = Days0_1_INC(1) + 1
                                     'sum of aging count for the priority 2 of incident tickets
@@ -192,13 +189,10 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                          End If
                           
                     Case 3:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(2) = Days0_1_INC(2) + 1
                                     'sum of aging count for the priority 3 of incident tickets
@@ -238,13 +232,10 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     
                     Case 4 And 5:
-                            If Cells(i, 25).Value = "" Then
              
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(3) = Days0_1_INC(3) + 1
                                     'sum of aging count for the priority 4 and 5 of incident tickets
@@ -284,17 +275,12 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                            End If
-                                
                 End Select
             Case "SRQ":
                 Select Case priority
                     Case 1:
-                            'closure count for resolved serice requests tickets
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(0) = Days0_1_SRQ(0) + 1
                                     'sum of aging count for the priority 1 of service requests tickets
@@ -335,12 +321,9 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     Case 2:
-                            If Cells(i, 25).Value = "" Then
     
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(1) = Days0_1_SRQ(1) + 1
                                     'sum of aging count for the priority 2 of service requests tickets
@@ -381,12 +364,9 @@ For i = 2 To DAlro
                                 End If
                             End If
                             
-                            End If
-                            
                     Case 3:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(2) = Days0_1_SRQ(2) + 1
                                     'sum of aging count for the priority 3 of service requests tickets
@@ -426,13 +406,10 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     
                     Case 4 And 5:
-                            If Cells(i, 25).Value = "" Then
                        
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(3) = Days0_1_SRQ(3) + 1
                                     'sum of aging count for the priority 4 and 5 of service requests tickets
@@ -472,15 +449,12 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
-                            
-                            End If
                 End Select
             Case "PRB":
                 Select Case priority
                     Case 1:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(0) = Days0_1_PRB(0) + 1
                                     'sum of aging count for the priority 1 of problem tickets
@@ -521,12 +495,9 @@ For i = 2 To DAlro
                                     Days_total_PRB(8) = Days_total_PRB(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     Case 2:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(1) = Days0_1_PRB(1) + 1
                                     'sum of aging count for the priority 2 of problem tickets
@@ -567,12 +538,9 @@ For i = 2 To DAlro
                                 End If
                             End If
                             
-                            End If
-                            
                     Case 3:
-                           If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(2) = Days0_1_PRB(2) + 1
                                     'sum of aging count for the priority 3 of problem tickets
@@ -611,15 +579,12 @@ For i = 2 To DAlro
                                     Days_Sum_PRB(2) = Days_Sum_PRB(2) + 1
                                     Days_total_PRB(8) = Days_total_PRB(8) + 1
                                 End If
-                            End If
                             
                             End If
                     
                     Case 4 And 5:
                             
-                            If Cells(i, 25).Value = "" Then
-                            
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(3) = Days0_1_PRB(3) + 1
                                     'sum of aging count for the priority 4 and 5 of problem tickets
@@ -659,10 +624,9 @@ For i = 2 To DAlro
                                     Days_total_PRB(8) = Days_total_PRB(8) + 1
                                 End If
                             End If
-                            
-                            End If
                 End Select
-        End Select
+            End Select
+        End If
      End If
 Next i
 '------------Counting aging based on team, ticket type and priority-----------------
@@ -846,9 +810,9 @@ For i = 2 To DAlro
             Cells(i, 19).Value = CLng(today) - Cells(i, 23).Value
     Else
         'Aging for resolved tickets
-        'checking whether Actualfinish date is not empty and should be greater than date of report
+        'checking whether Actualfinish date is not empty and greater than today
         If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(today) Then
-            'if Actual start date is empty then taking the difference between todays date and Creation date
+                'taking the difference between todays date and Creation date
                 Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
         End If
     End If
@@ -856,20 +820,20 @@ Next i
 
 '------------Counting aging based on team, ticket type and priority-----------------
 For i = 2 To DAlro
-             
+                
         ticket_type = Cells(i, 1).Value
         priority = Cells(i, 12).Value
         age_of_tkt = Cells(i, 19).Value
         element = Cells(i, 19).Value
-
+        
+        If Cells(i, 25).Value = "" Then
+        
         Select Case ticket_type
             Case "INC":
                 Select Case priority
                     Case 1:
-                            
-                            If Cells(i, 25).Value = "" Then
                                                    
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(0) = Days0_1_INC(0) + 1
                                     'sum of aging count for the priority 1 of incident tickets
@@ -910,12 +874,9 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     Case 2:
-                          If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(1) = Days0_1_INC(1) + 1
                                     'sum of aging count for the priority 2 of incident tickets
@@ -955,13 +916,10 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                          End If
                           
                     Case 3:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(2) = Days0_1_INC(2) + 1
                                     'sum of aging count for the priority 3 of incident tickets
@@ -1001,13 +959,10 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     
                     Case 4 And 5:
-                            If Cells(i, 25).Value = "" Then
              
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(3) = Days0_1_INC(3) + 1
                                     'sum of aging count for the priority 4 and 5 of incident tickets
@@ -1047,17 +1002,12 @@ For i = 2 To DAlro
                                     Days_total_INC(8) = Days_total_INC(8) + 1
                                 End If
                             End If
-                            
-                            End If
-                                
                 End Select
             Case "SRQ":
                 Select Case priority
                     Case 1:
-                            'closure count for resolved serice requests tickets
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(0) = Days0_1_SRQ(0) + 1
                                     'sum of aging count for the priority 1 of service requests tickets
@@ -1098,12 +1048,9 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     Case 2:
-                            If Cells(i, 25).Value = "" Then
     
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(1) = Days0_1_SRQ(1) + 1
                                     'sum of aging count for the priority 2 of service requests tickets
@@ -1144,12 +1091,9 @@ For i = 2 To DAlro
                                 End If
                             End If
                             
-                            End If
-                            
                     Case 3:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(2) = Days0_1_SRQ(2) + 1
                                     'sum of aging count for the priority 3 of service requests tickets
@@ -1189,13 +1133,10 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     
                     Case 4 And 5:
-                            If Cells(i, 25).Value = "" Then
                        
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(3) = Days0_1_SRQ(3) + 1
                                     'sum of aging count for the priority 4 and 5 of service requests tickets
@@ -1235,15 +1176,12 @@ For i = 2 To DAlro
                                     Days_total_SRQ(8) = Days_total_SRQ(8) + 1
                                 End If
                             End If
-                            
-                            End If
                 End Select
             Case "PRB":
                 Select Case priority
                     Case 1:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(0) = Days0_1_PRB(0) + 1
                                     'sum of aging count for the priority 1 of problem tickets
@@ -1284,12 +1222,9 @@ For i = 2 To DAlro
                                     Days_total_PRB(8) = Days_total_PRB(8) + 1
                                 End If
                             End If
-                            
-                            End If
                     Case 2:
-                            If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(1) = Days0_1_PRB(1) + 1
                                     'sum of aging count for the priority 2 of problem tickets
@@ -1330,12 +1265,9 @@ For i = 2 To DAlro
                                 End If
                             End If
                             
-                            End If
-                            
                     Case 3:
-                           If Cells(i, 25).Value = "" Then
                             
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(2) = Days0_1_PRB(2) + 1
                                     'sum of aging count for the priority 3 of problem tickets
@@ -1374,15 +1306,12 @@ For i = 2 To DAlro
                                     Days_Sum_PRB(2) = Days_Sum_PRB(2) + 1
                                     Days_total_PRB(8) = Days_total_PRB(8) + 1
                                 End If
-                            End If
                             
                             End If
                     
                     Case 4 And 5:
                             
-                            If Cells(i, 25).Value = "" Then
-                            
-                            If CStr(age_of_tkt) <> "" And age_of_tkt > 0 Then
+                            If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_PRB(3) = Days0_1_PRB(3) + 1
                                     'sum of aging count for the priority 4 and 5 of problem tickets
@@ -1422,10 +1351,9 @@ For i = 2 To DAlro
                                     Days_total_PRB(8) = Days_total_PRB(8) + 1
                                 End If
                             End If
-                            
-                            End If
                 End Select
-        End Select
+            End Select
+        End If
 Next i
 '------------Counting aging based on team, ticket type and priority-----------------
 

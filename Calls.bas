@@ -95,8 +95,6 @@ End If
     Columns("C").ColumnWidth = 14
     Columns("S").ColumnWidth = 9
     
-
-    
     'fixing row height and column width
     Rows("34:" & CSSlro).RowHeight = 30
     Rows("34:" & CSSlro).ColumnWidth = 6
@@ -125,7 +123,7 @@ Sub pCloseApp()
     'Hidding the File
 
 
-    WS_DA.Visible = xlSheetVeryHidden
+    WS_DA.Visible = xlVeryHidden
     WS_CSS.Activate
     
     Application.ScreenUpdating = True
