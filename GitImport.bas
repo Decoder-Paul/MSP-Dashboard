@@ -20,6 +20,7 @@ Sub pImport()
         End If
     Next cmpComponent
     
+    Set objFSO = New Scripting.FileSystemObject
     ' Import the VBA code required
     If objFSO.GetFolder(ModulePath).Files.Count = 0 Then
        MsgBox "There are no files to import"
@@ -28,13 +29,12 @@ Sub pImport()
         For Each objFile In objFSO.GetFolder(ModulePath).Files
             If (objFSO.GetExtensionName(objFile.Name) = "cls") Or _
                 (objFSO.GetExtensionName(objFile.Name) = "frm") Or _
-                (objFSO.GetExtensionName(objFile.Name) = "bas") Then
+                (objFSO.GetExtensionName(objFile.Name) = "bas") And _
+                objFile.Name <> "GitImport.bas" Then
                 ThisWorkbook.VBProject.VBComponents.Import objFile.Path
             End If
         Next objFile
     End If
-    ActiveWorkbook.VBProject.VBComponents.Import ModulePath
-    
     ' Save the workbook
     ActiveWorkbook.Save
     MsgBox "Import Successful!"
@@ -74,7 +74,7 @@ Sub pExport()
             cmpComponent.Export ModulePath & "\" & szFileName
         End If
     Next cmpComponent
-    
+    MsgBox "Export Successful!"
 End Sub
 
 
