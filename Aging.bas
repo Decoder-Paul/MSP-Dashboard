@@ -99,6 +99,7 @@ For i = 2 To DAlro
         age_of_tkt = Cells(i, 19).Value
         element = Cells(i, 19).Value
         
+        'calculating age of ticket for active tickets
         If Cells(i, 25).Value = "" Then
         
         Select Case ticket_type
@@ -826,6 +827,7 @@ For i = 2 To DAlro
         age_of_tkt = Cells(i, 19).Value
         element = Cells(i, 19).Value
         
+        'calculating age of ticket for active tickets
         If Cells(i, 25).Value = "" Then
         
         Select Case ticket_type
