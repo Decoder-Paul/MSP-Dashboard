@@ -122,8 +122,7 @@ Sub pCloseApp()
 
     'Hidding the File
 
-
-    WS_DA.Visible = xlVeryHidden
+    WS_DA.Visible = xlSheetHidden
     WS_CSS.Activate
     
     Application.ScreenUpdating = True

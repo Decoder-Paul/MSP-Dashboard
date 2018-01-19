@@ -43,7 +43,9 @@ Sub pOpenApp()
     Set WS_HM = WB.Sheets("Home")
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
     
-    'Date of report taking
+    WS_DA.Visible = True
+    
+    'today is the Date of report
      today = Date
 
     Application.ScreenUpdating = False
@@ -51,7 +53,7 @@ Sub pOpenApp()
     
     Call InputDate
 
-'   Call pCleanDB
+    Call pCleanDB
     Call QtrReplication
     
     Call mainDataStaging
@@ -61,8 +63,7 @@ Sub pOpenApp()
     Call teamsDashboard
     
     Call pCloseApp
-    Application.ScreenUpdating = True
-    Application.DisplayAlerts = True
+
     ' Determine how many seconds this code will take to run
     SecondsElapsed = Round(Timer - StartTime, 2)
     'Notify user in seconds
@@ -130,9 +131,9 @@ Sub teamsDashboard()
         team = Cells(i, 22).Value
         Call agingCount(team)
         'generating the dashboard for each team and quarterwise
-'        For j = 0 To c
-'            Call ticketCount(team, j)
-'        Next j
+        For j = 0 To c - 1
+            Call ticketCount(team, j)
+        Next j
         'replicating the team's dashboard
         Call ReplicateMainSheet(team)
         'cleansing of CSS sheet after replication
@@ -149,11 +150,26 @@ Sub teamsDashboard()
     
     Next i
 
-  Call pCleanDB
-  Call agingCountForAll
-
+    Call pCleanDBExclusive
+    For j = 0 To c - 1
+        Call ticketCountAll(j)
+    Next j
+    Call agingCountForAll
 End Sub
-
+Sub pCleanDBExclusive()
+    Dim CSSlro As Integer
+    'Support Dashboard contents cleansing
+    'Active Ticket's stat table
+    WS_CSS.Range("D5:R9").ClearContents
+    WS_CSS.Range("T5:X9").ClearContents
+    
+    'Aging Data Table
+    WS_CSS.Range("D14:R23").ClearContents
+    WS_CSS.Range("D28:R28").ClearContents
+    CSSlro = WS_CSS.Cells(WS_DA.Rows.Count, "C").End(xlUp).Row
+    'Quarter Stats Table
+    WS_CSS.Range("D34:W" & CSSlro).ClearContents
+End Sub
 Sub ReplicateMainSheet(ByVal Item As String)
 
 '   Deleting the existing Team file then only it'll create new sheet
