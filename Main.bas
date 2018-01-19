@@ -43,6 +43,8 @@ Sub pOpenApp()
     Set WS_HM = WB.Sheets("Home")
     Set WS_CPA = WB.Sheets("Consolidated Performance Audit")
     
+    WS_DA.Visible = True
+    
     'today is the Date of report
      today = Date
 
