@@ -58,7 +58,7 @@ Sub activeCount(ByVal team As String)
         If Cells(Data_i, 8).Value = team Then
             '------ Active Ticket Filteration -------
             finishDate = Cells(Data_i, 25).Value
-            If finishDate = "" Then
+            If CStr(finishDate) = "" Then
                 tkt_type = Cells(Data_i, 1).Value ' Ticket Type
                 prty = Cells(Data_i, 12).Value ' Priority
                 rspSLA = Cells(Data_i, 2).Value
@@ -356,7 +356,7 @@ Sub activeCountAll()
     For Data_i = 2 To Data_rowCount
         '------ Active Ticket Filteration -------
         finishDate = Cells(Data_i, 25).Value
-        If finishDate = "" Then
+        If CStr(finishDate) = "" Then
             tkt_type = Cells(Data_i, 1).Value ' Ticket Type
             prty = Cells(Data_i, 12).Value ' Priority
             rspSLA = Cells(Data_i, 2).Value
@@ -567,7 +567,7 @@ Sub activeCountAll()
         End If
     Next i
     WS_CSS.Select
-    
+    Cells(5, 1).Value = "ALL"
     '------------------ VERSIONWISE Value Placement of the Variable in Excel sheet -------------
     '----------Incident----------
     Range("D5:H5").Value = active_Inc
