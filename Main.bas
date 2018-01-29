@@ -130,6 +130,8 @@ Sub teamsDashboard()
         'getting team name from main data
         team = Cells(i, 22).Value
         Call agingCount(team)
+        'Active Ticket Stat teamwise
+        Call activeCount(team)
         'generating the dashboard for each team and quarterwise
         For j = 0 To c - 1
             Call ticketCount(team, j)
@@ -155,6 +157,7 @@ Sub teamsDashboard()
         Call ticketCountAll(j)
     Next j
     Call agingCountForAll
+    Call activeCountAll
 End Sub
 Sub pCleanDBExclusive()
     Dim CSSlro As Integer
