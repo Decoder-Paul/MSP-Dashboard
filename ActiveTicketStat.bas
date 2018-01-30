@@ -1,4 +1,4 @@
-Attribute VB_Name = "ActiveticketsClosure"
+Attribute VB_Name = "ActiveTicketStat"
 Sub activeCount(ByVal team As String)
 '========================================================================================================
 ' activeCount
@@ -46,7 +46,6 @@ Sub activeCount(ByVal team As String)
     Dim resSLA As String
     Dim prty As Integer
 
-    Dim createDate As Long
     Dim finishDate As Long
 
     WS_DA.Select
