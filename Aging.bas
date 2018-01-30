@@ -1455,3 +1455,106 @@ Next i
 Cells(23, 18).Value = Sum
 
 End Sub
+Function avgClosure(team As String, tkt_type As String, prty As Integer) As Variant
+
+    Dim arrList As Object
+    Set arrList = CreateObject("System.Collections.ArrayList")
+    
+    Dim a As Integer
+    Dim Data_rowCount As Long
+    Dim Data_i As Long
+    
+    WS_DA.Select
+    Data_rowCount = ActiveSheet.Cells(Rows.Count, "A").End(xlUp).Row
+    
+    If team <> "all" Then
+        For Data_i = 2 To Data_rowCount
+            If Cells(Data_i, 8).Value = team Then ' Team Filteration ------
+                If tkt_type = Cells(Data_i, 1).Value Then ' Ticket Type Filteration ------
+                    If prty = Cells(Data_i, 12).Value Then ' Priority Filteration ------
+                        '------ Active Ticket Filteration ------
+                        finishDate = Cells(Data_i, 25).Value
+                        If CStr(finishDate) <> "" Then
+                            arrList.Add Cells(Data_i, 19).Value
+                        End If
+                    End If
+                End If
+            End If
+        Next Data_i
+    Else
+        For Data_i = 2 To Data_rowCount
+            If tkt_type = Cells(Data_i, 1).Value Then ' Ticket Type Filteration ------
+                If prty = Cells(Data_i, 12).Value Then ' Priority Filteration ------
+                    '------ Active Ticket Filteration ------
+                    finishDate = Cells(Data_i, 25).Value
+                    If CStr(finishDate) <> "" Then
+                        arrList.Add Cells(Data_i, 19).Value
+                    End If
+                End If
+            End If
+        Next Data_i
+    End If
+    'Calculating Median down here
+    arrList.Sort
+    a = arrList.Count
+    If a > 0 Then
+        If a Mod 2 = 0 Then
+            avgClosure = (arrList(a / 2) + arrList((a / 2) - 1)) / 2
+        Else
+            avgClosure = arrList(a / 2)
+        End If
+    Else
+        avgClosure = ""
+    End If
+End Function
+Sub medianClousre(ByVal team As String)
+    Dim med_Inc(4) As Variant
+    Dim med_Srq(4) As Variant
+    Dim med_Prb(4) As Variant
+    Dim i As Integer
+    
+    For i = 1 To 5
+        med_Inc(i - 1) = avgClosure(team, "INC", i)
+        med_Srq(i - 1) = avgClosure(team, "SRQ", i)
+        med_Prb(i - 1) = avgClosure(team, "PRB", i)
+    Next i
+'        Priority 4 & 5 combined
+'        med_Inc(3) = med_Inc(3) + avgClosure(team, "INC", 5)
+'        med_Srq(3) = med_Srq(3) + avgClosure(team, "SRQ", 5)
+'        med_Prb(3) = med_Prb(3) + avgClosure(team, "PRB", 5)
+'   For i = 0 To 3
+'        med_Inc(4) = med_Inc(4) + med_Inc(i)
+'        med_Srq(4) = med_Srq(4) + med_Srq(i)
+'        med_Prb(4) = med_Prb(4) + med_Prb(i)
+'    Next i
+    WS_CSS.Select
+    Range("D28:H28").Value = med_Inc
+    Range("I28:M28").Value = med_Srq
+    Range("N28:R28").Value = med_Prb
+End Sub
+Sub medianClousreAll()
+    Dim med_Inc(4) As Variant
+    Dim med_Srq(4) As Variant
+    Dim med_Prb(4) As Variant
+    Dim i As Integer
+    
+    For i = 1 To 5
+        med_Inc(i - 1) = avgClosure("all", "INC", i)
+        med_Srq(i - 1) = avgClosure("all", "SRQ", i)
+        med_Prb(i - 1) = avgClosure("all", "PRB", i)
+    Next i
+'        Priority 4 & 5 combined
+'        med_Inc(3) = med_Inc(3) + avgClosure("all", "INC", 5)
+'        med_Srq(3) = med_Srq(3) + avgClosure("all", "SRQ", 5)
+'        med_Prb(3) = med_Prb(3) + avgClosure("all", "PRB", 5)
+'    For i = 0 To 3
+'        med_Inc(4) = med_Inc(4) + med_Inc(i)
+'        med_Srq(4) = med_Srq(4) + med_Srq(i)
+'        med_Prb(4) = med_Prb(4) + med_Prb(i)
+'    Next i
+    WS_CSS.Select
+    Range("D28:H28").Value = med_Inc
+    Range("I28:M28").Value = med_Srq
+    Range("N28:R28").Value = med_Prb
+End Sub
+
