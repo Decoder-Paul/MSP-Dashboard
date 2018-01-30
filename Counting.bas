@@ -1,2584 +1,1931 @@
 Attribute VB_Name = "Counting"
 Public Rng As Range
-Sub ticketCount()
-
+Sub ticketCount(ByVal team As String, ByVal v As Integer)
 '========================================================================================================
 ' TicketCount
 ' -------------------------------------------------------------------------------------------------------
 ' Purpose   :   To get no. of Tickets depending on conditions from Data File to Dashboard .
 '
-' Author    :   Subhankar Paul, 9th February, 2017
-    ' Notes     :   Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant, Shambhavi made some changes
-'
-' Parameter :   N/A
+' Author    :   Subhankar Paul, 11th January, 2018
+' Notes     :   . Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant
+'               . 4 parameters are calculated at the end of the count are
+'                 Avg Effort, ResponseSLA %, ResolutionSLA % & Avg Closure Duration
+'               . The value placement in Excel Cells are flexible with versions
+' Parameter :   team,v - team and quarter wise the procedure will be called repeatedly, v is the row no. of
+'               quarter array
 ' Returns   :   N/A
 ' ---------------------------------------------------------------
 ' Revision History
 '========================================================================================================
-Application.ScreenUpdating = False
-Application.DisplayAlerts = False
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    
+    '----------Incident----------
+    Dim opnBal_Inc(4) As Integer
+    Dim recvd_Inc(4) As Integer
+    Dim carried_Inc(4) As Integer
+    Dim closed_Inc(4) As Integer
+    Dim reOpen_Inc(4) As Integer
+    Dim totEff_Inc(4) As Long
+    Dim avgEff_Inc(4) As Integer
+    Dim tmSize_Inc As Integer
+    Dim rspSla_Inc(4) As Integer
+    Dim rspSlaPrcnt_Inc(4) As Integer
+    Dim resSla_Inc(4) As Integer
+    Dim resSlaPrcnt_Inc(4) As Integer
+    Dim cloDur_Inc(4) As Long
+    Dim avgClosure_Inc(4) As Integer
+    '--------Service Request--------
+    Dim opnBal_Srq(4) As Integer
+    Dim recvd_Srq(4) As Integer
+    Dim carried_Srq(4) As Integer
+    Dim closed_Srq(4) As Integer
+    Dim reOpen_Srq(4) As Integer
+    Dim totEff_Srq(4) As Long
+    Dim avgEff_Srq(4) As Integer
+    Dim tmSize_Srq As Integer
+    Dim rspSla_Srq(4) As Integer
+    Dim rspSlaPrcnt_Srq(4) As Integer
+    Dim resSla_Srq(4) As Integer
+    Dim resSlaPrcnt_Srq(4) As Integer
+    Dim cloDur_Srq(4) As Long
+    Dim avgClosure_Srq(4) As Integer
+    '--------Problem Statement--------
+    Dim opnBal_Prb(4) As Integer
+    Dim recvd_Prb(4) As Integer
+    Dim carried_Prb(4) As Integer
+    Dim closed_Prb(4) As Integer
+    Dim reOpen_Prb(4) As Integer
+    Dim totEff_Prb(4) As Long
+    Dim avgEff_Prb(4) As Integer
+    Dim tmSize_Prb As Integer
+    Dim rspSla_Prb(4) As Integer
+    Dim rspSlaPrcnt_Prb(4) As Integer
+    Dim resSla_Prb(4) As Integer
+    Dim resSlaPrcnt_Prb(4) As Integer
+    Dim cloDur_Prb(4) As Long
+    Dim avgClosure_Prb(4) As Integer
+    '--------Change Request--------
+    Dim opnBal_Chg(4) As Integer
+    Dim recvd_Chg(4) As Integer
+    Dim carried_Chg(4) As Integer
+    Dim closed_Chg(4) As Integer
+    Dim reOpen_Chg(4) As Integer
+    Dim totEff_Chg(4) As Long
+    Dim avgEff_Chg(4) As Integer
+    Dim tmSize_Chg As Integer
+    Dim winMiss_Chg(4) As Integer
+    Dim winMissPrcnt_Chg(4) As Integer
+    '---- variables to store the required values of each record for computation -----
+    Dim Data_rowCount As Long
+    Dim Data_i As Long
+    Dim j As Long
+    
+    Dim tkt_type As String
+    Dim reOpnd As String
+    Dim rspSLA As String
+    Dim resSLA As String
+    Dim prty As Integer
+    Dim effort As Double
+    Dim createDate As Long
+    Dim finishDate As Long
+    '------------ Dictionary Creation for Distinct Count of Assigned resource --
+    Dim INC_Dict, CHG_Dict, SRQ_Dict, PRB_Dict As Object
+    Set INC_Dict = CreateObject("scripting.dictionary")
+    Set CHG_Dict = CreateObject("scripting.dictionary")
+    Set SRQ_Dict = CreateObject("scripting.dictionary")
+    Set PRB_Dict = CreateObject("scripting.dictionary")
+    
+    
+    Dim startDate As Long
+    Dim endDate As Long
+    
+    WS_DA.Select
 
+    'parameter v is used to get the quarter version
+    startDate = CLng(quarters(v, 0))
+    endDate = CLng(quarters(v, 1))
+    
+    Data_rowCount = ActiveSheet.Cells(Rows.Count, "A").End(xlUp).Row
 
-Dim sheetData As String
-Dim sheetDbd As String
-Dim BI As Variant
-Dim R, lro As Long
-Dim C As Long
-
-sheetData = "Consolidated Report"
-sheetDbd = "Summary"
-
-'------------ Checking for the Data & Dashboard Sheets -----------
-If fSheetExists(sheetData) = True Then
-    Sheets(sheetData).Activate
-    If fSheetExists(sheetDbd) = True Then
-        Sheets(sheetDbd).Activate
-    Else
-        MsgBox "Dashboard Sheet doesn't Exist"
+    For Data_i = 2 To Data_rowCount
+        '------------------ Filtering Data for TEAM ----------------------
+        If Cells(Data_i, 8).Value = team Then
+            tkt_type = Cells(Data_i, 1).Value ' Ticket Type
+            prty = Cells(Data_i, 12).Value ' Priority
+            createDate = Cells(Data_i, 23).Value
+            finishDate = Cells(Data_i, 25).Value
+            reOpnd = Cells(Data_i, 18).Value
+            rspSLA = Cells(Data_i, 2).Value
+            resSLA = Cells(Data_i, 3).Value
+            Select Case tkt_type
+                'If Incident ticket type
+                Case "INC"
+                    If INC_Dict.Exists(element) Then
+                        INC_Dict.Item(element) = INC_Dict.Item(element) + 1
+                    Else
+                        INC_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Opening Balance:
+                            opnBal_Inc(0) = opnBal_Inc(0) + 1
+                            'CarryForward
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(0) = recvd_Inc(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Inc(0) = rspSla_Inc(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(0) = reOpen_Inc(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Inc(1) = opnBal_Inc(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(1) = carried_Inc(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(1) = closed_Inc(1) + 1
+                                totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
+                                cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(1) = resSla_Inc(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(1) = recvd_Inc(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(1) = rspSla_Inc(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(1) = reOpen_Inc(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(1) = carried_Inc(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(1) = closed_Inc(1) + 1
+                                totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
+                                cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(1) = resSla_Inc(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Inc(2) = opnBal_Inc(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(2) = carried_Inc(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(2) = closed_Inc(2) + 1
+                                totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
+                                cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(2) = resSla_Inc(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(2) = recvd_Inc(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(2) = rspSla_Inc(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(2) = reOpen_Inc(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(2) = carried_Inc(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(2) = closed_Inc(2) + 1
+                                totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
+                                cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(2) = resSla_Inc(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Inc(3) = opnBal_Inc(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(3) = recvd_Inc(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(3) = rspSla_Inc(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(3) = reOpen_Inc(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Inc(3) = opnBal_Inc(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(3) = recvd_Inc(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(3) = rspSla_Inc(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(3) = reOpen_Inc(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        End If
+                End Select
+'If ticket type = SRQ
+                Case "SRQ"
+                    If SRQ_Dict.Exists(element) Then
+                        SRQ_Dict.Item(element) = SRQ_Dict.Item(element) + 1
+                    Else
+                        SRQ_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Srq(0) = opnBal_Srq(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(0) = carried_Srq(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(0) = closed_Srq(0) + 1
+                                'Total Effort Spent
+                                totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Srq(0) = resSla_Srq(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(0) = recvd_Srq(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Srq(0) = rspSla_Srq(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(0) = reOpen_Srq(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(0) = carried_Srq(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(0) = closed_Srq(0) + 1
+                                'Total Effort Spent
+                                totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Srq(0) = resSla_Srq(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Srq(1) = opnBal_Srq(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(1) = carried_Srq(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(1) = closed_Srq(1) + 1
+                                totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
+                                cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(1) = resSla_Srq(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(1) = recvd_Srq(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(1) = rspSla_Srq(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(1) = reOpen_Srq(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(1) = carried_Srq(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(1) = closed_Srq(1) + 1
+                                totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
+                                cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(1) = resSla_Srq(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Srq(2) = opnBal_Srq(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(2) = carried_Srq(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(2) = closed_Srq(2) + 1
+                                totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
+                                cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(2) = resSla_Srq(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(2) = recvd_Srq(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(2) = rspSla_Srq(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(2) = reOpen_Srq(2) + 1
+                            End If
+                            If CStr(finishDate) = o Or finishDate > endDate Then
+                                carried_Srq(2) = carried_Srq(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(2) = closed_Srq(2) + 1
+                                totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
+                                cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(2) = resSla_Srq(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(3) = recvd_Srq(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(3) = rspSla_Srq(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(3) = reOpen_Srq(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(3) = recvd_Srq(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(3) = rspSla_Srq(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(3) = reOpen_Srq(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        End If
+                    End Select
+'If ticket type = PRB
+                Case "PRB"
+                    If PRB_Dict.Exists(element) Then
+                        PRB_Dict.Item(element) = PRB_Dict.Item(element) + 1
+                    Else
+                        PRB_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Prb(0) = opnBal_Prb(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(0) = carried_Prb(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(0) = closed_Prb(0) + 1
+                                'Total Effort Spent
+                                totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Prb(0) = resSla_Prb(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(0) = recvd_Prb(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Prb(0) = rspSla_Prb(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(0) = reOpen_Prb(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(0) = carried_Prb(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(0) = closed_Prb(0) + 1
+                                'Total Effort Spent
+                                totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Prb(0) = resSla_Prb(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Prb(1) = opnBal_Prb(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(1) = carried_Prb(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(1) = closed_Prb(1) + 1
+                                totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
+                                cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(1) = resSla_Prb(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(1) = recvd_Prb(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(1) = rspSla_Prb(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(1) = reOpen_Prb(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(1) = carried_Prb(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(1) = closed_Prb(1) + 1
+                                totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
+                                cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(1) = resSla_Prb(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Prb(2) = opnBal_Prb(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(2) = carried_Prb(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(2) = closed_Prb(2) + 1
+                                totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
+                                cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(2) = resSla_Prb(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(2) = recvd_Prb(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(2) = rspSla_Prb(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(2) = reOpen_Prb(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(2) = carried_Prb(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(2) = closed_Prb(2) + 1
+                                totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
+                                cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(2) = resSla_Prb(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Prb(3) = opnBal_Prb(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(3) = recvd_Prb(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(3) = rspSla_Prb(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(3) = reOpen_Prb(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Prb(3) = opnBal_Prb(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(3) = recvd_Prb(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(3) = rspSla_Prb(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(3) = reOpen_Prb(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        End If
+                End Select
+                'If ticket type = CHG
+                Case "ACT"
+                    If CHG_Dict.Exists(element) Then
+                        CHG_Dict.Item(element) = CHG_Dict.Item(element) + 1
+                    Else
+                        CHG_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Chg(0) = opnBal_Chg(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(0) = carried_Chg(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(0) = closed_Chg(0) + 1
+                                'Total Effort Spent
+                                totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(0) = recvd_Chg(0) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(0) = reOpen_Chg(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(0) = carried_Chg(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(0) = closed_Chg(0) + 1
+                                'Total Effort Spent
+                                totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
+                                'Change Window missed implemented
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(0) = winMiss_Chg(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Chg(1) = opnBal_Chg(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(1) = carried_Chg(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(1) = closed_Chg(1) + 1
+                                totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(1) = recvd_Chg(1) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(1) = reOpen_Chg(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(1) = carried_Chg(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(1) = closed_Chg(1) + 1
+                                totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(1) = winMiss_Chg(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Chg(2) = opnBal_Chg(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(2) = carried_Chg(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(2) = closed_Chg(2) + 1
+                                totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(2) = recvd_Chg(2) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(2) = reOpen_Chg(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(2) = carried_Chg(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(2) = closed_Chg(2) + 1
+                                totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(2) = winMiss_Chg(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Chg(3) = opnBal_Chg(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(3) = recvd_Chg(3) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(3) = reOpen_Chg(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(3) = winMiss_Chg(0) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Chg(3) = opnBal_Chg(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(3) = recvd_Chg(3) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(3) = reOpen_Chg(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(3) = winMiss_Chg(3) + 1
+                                End If
+                            End If
+                        End If
+                End Select
+            End Select
+        End If
+    Next Data_i
+    ' Total of the following variables are calculated
+    For i = 0 To 3
+        opnBal_Inc(4) = opnBal_Inc(4) + opnBal_Inc(i)
+        recvd_Inc(4) = recvd_Inc(4) + recvd_Inc(i)
+        carried_Inc(4) = carried_Inc(4) + carried_Inc(i)
+        closed_Inc(4) = closed_Inc(4) + closed_Inc(i)
+        reOpen_Inc(4) = reOpen_Inc(4) + reOpen_Inc(i)
+        totEff_Inc(4) = totEff_Inc(4) + totEff_Inc(i)
+        rspSla_Inc(4) = rspSla_Inc(4) + rspSla_Inc(i)
+        resSla_Inc(4) = resSla_Inc(4) + resSla_Inc(i)
+        cloDur_Inc(4) = cloDur_Inc(4) + cloDur_Inc(i)
+        
+        opnBal_Srq(4) = opnBal_Srq(4) + opnBal_Srq(i)
+        recvd_Srq(4) = recvd_Srq(4) + recvd_Srq(i)
+        carried_Srq(4) = carried_Srq(4) + carried_Srq(i)
+        closed_Srq(4) = closed_Srq(4) + closed_Srq(i)
+        reOpen_Srq(4) = reOpen_Srq(4) + reOpen_Srq(i)
+        totEff_Srq(4) = totEff_Srq(4) + totEff_Srq(i)
+        rspSla_Srq(4) = rspSla_Srq(4) + rspSla_Srq(i)
+        resSla_Srq(4) = resSla_Srq(4) + resSla_Srq(i)
+        cloDur_Srq(4) = cloDur_Srq(4) + cloDur_Srq(i)
+        
+        opnBal_Prb(4) = opnBal_Prb(4) + opnBal_Prb(i)
+        recvd_Prb(4) = recvd_Prb(4) + recvd_Prb(i)
+        carried_Prb(4) = carried_Prb(4) + carried_Prb(i)
+        closed_Prb(4) = closed_Prb(4) + closed_Prb(i)
+        reOpen_Prb(4) = reOpen_Prb(4) + reOpen_Prb(i)
+        totEff_Prb(4) = totEff_Prb(4) + totEff_Prb(i)
+        rspSla_Prb(4) = rspSla_Prb(4) + rspSla_Prb(i)
+        resSla_Prb(4) = resSla_Prb(4) + resSla_Prb(i)
+        cloDur_Prb(4) = cloDur_Prb(4) + cloDur_Prb(i)
+        
+        opnBal_Chg(4) = opnBal_Chg(4) + opnBal_Chg(i)
+        recvd_Chg(4) = recvd_Chg(4) + recvd_Chg(i)
+        carried_Chg(4) = carried_Chg(4) + carried_Chg(i)
+        closed_Chg(4) = closed_Chg(4) + closed_Chg(i)
+        reOpen_Chg(4) = reOpen_Chg(4) + reOpen_Chg(i)
+        totEff_Chg(4) = totEff_Chg(4) + totEff_Chg(i)
+        winMiss_Chg(4) = winMiss_Chg(4) + winMiss_Chg(i)
+    Next i
+    'average is being calculated here
+    For i = 0 To 4
+        If closed_Inc(i) <> 0 Then
+            avgEff_Inc(i) = totEff_Inc(i) / closed_Inc(i)
+            resSlaPrcnt_Inc(i) = resSla_Inc(i) * 100 / closed_Inc(i)
+            avgClosure_Inc(i) = cloDur_Inc(i) / closed_Inc(i)
+        End If
+        If closed_Srq(i) <> 0 Then
+            avgEff_Srq(i) = totEff_Srq(i) / closed_Srq(i)
+            resSlaPrcnt_Srq(i) = resSla_Srq(i) * 100 / closed_Srq(i)
+            avgClosure_Srq(i) = cloDur_Srq(i) / closed_Srq(i)
+        End If
+        If closed_Prb(i) <> 0 Then
+            avgEff_Prb(i) = totEff_Prb(i) / closed_Prb(i)
+            resSlaPrcnt_Prb(i) = resSla_Prb(i) * 100 / closed_Prb(i)
+            avgClosure_Prb(i) = cloDur_Prb(i) / closed_Prb(i)
+        End If
+        If closed_Chg(i) <> 0 Then
+            avgEff_Chg(i) = totEff_Chg(i) / closed_Chg(i)
+            winMissPrcnt_Chg(i) = winMiss_Chg(i) * 100 / closed_Chg(i)
+        End If
+        
+        If recvd_Inc(i) <> 0 Then
+            rspSlaPrcnt_Inc(i) = rspSla_Inc(i) * 100 / recvd_Inc(i)
+        End If
+        If recvd_Srq(i) <> 0 Then
+            rspSlaPrcnt_Srq(i) = rspSla_Srq(i) * 100 / recvd_Srq(i)
+        End If
+        If recvd_Prb(i) <> 0 Then
+            rspSlaPrcnt_Prb(i) = rspSla_Prb(i) * 100 / recvd_Prb(i)
+        End If
+    Next i
+    
+    'Checking Whether Dictionary contains Blank String
+    If INC_Dict.Exists("") Then
+        tmSize_Inc = INC_Dict.Count - 1
     End If
-Else
-    MsgBox "Data Sheet doesn't Exist"
-End If
-
-Sheets(sheetDbd).Select
-
-'------------ Cleaning Previous Data from the cells -----------
-Dim clean As Range
-
-Set clean = Range("B4:K12")
-clean.Select
-Selection.Cells.ClearContents
-
-Set clean = Range("B14:K22")
-clean.Select
-Selection.Cells.ClearContents
-
-Set clean = Range("B24:K32")
-clean.Select
-Selection.Cells.ClearContents
-
-Set clean = Range("B34:K42")
-clean.Select
-Selection.Cells.ClearContents
-
-Set clean = Range("B44:K51")
-clean.Select
-Selection.Cells.ClearContents
-'------------------ Range Selection ----------
-Sheets(sheetData).Select
-lro = Sheets(sheetData).Cells(Rows.Count, "A").End(xlUp).Row
-Set Rng = Sheets(sheetData).Range("O2:O" & lro)
-For i = 2 To lro
-    Cells(i, 18).Value = CLng(Cells(i, 10).Value) 'Creation Date Converted to Integer
-    If Cells(i, 12).Value <> "" Then
-        Cells(i, 19).Value = CLng(Cells(i, 12).Value) 'Finish Date Converted to Integer
+    If SRQ_Dict.Exists("") Then
+        tmSize_Srq = SRQ_Dict.Count - 1
     End If
-Next i
-Call Trans_SRQ_ver1
-Call Trans_INC_ver1
-Call Trans_PRB_ver1
-Call Trans_ACT_ver1
-Call Atlas_SRQ_ver1
-Call Atlas_INC_ver1
-Call Atlas_PRB_ver1
-Call Atlas_ACT_ver1
+    If CHG_Dict.Exists("") Then
+        tmSize_Chg = CHG_Dict.Count - 1
+    End If
+    If PRB_Dict.Exists("") Then
+        tmSize_Prb = PRB_Dict.Count - 1
+    End If
+    
+    
+    WS_CSS.Select
+    
+    '------------------ VERSIONWISE Value Placement of the Variable in Excel sheet -------------
+    '----------Incident----------
+    Range("D" & 34 + 15 * v & ":H" & 34 + 15 * v).Value = opnBal_Inc
+    Range("D" & 35 + 15 * v & ":H" & 35 + 15 * v).Value = recvd_Inc
+    Range("D" & 36 + 15 * v & ":H" & 36 + 15 * v).Value = carried_Inc
+    Range("D" & 37 + 15 * v & ":H" & 37 + 15 * v).Value = closed_Inc
+    Range("D" & 38 + 15 * v & ":H" & 38 + 15 * v).Value = reOpen_Inc
+    Range("D" & 39 + 15 * v & ":H" & 39 + 15 * v).Value = totEff_Inc
+    Range("D" & 40 + 15 * v & ":H" & 40 + 15 * v).Value = avgEff_Inc
+    Cells(41 + 15 * v, 4).Value = tmSize_Inc
+    Range("D" & 44 + 15 * v & ":H" & 44 + 15 * v).Value = rspSla_Inc
+    Range("D" & 45 + 15 * v & ":H" & 45 + 15 * v).Value = rspSlaPrcnt_Inc
+    Range("D" & 46 + 15 * v & ":H" & 46 + 15 * v).Value = resSla_Inc
+    Range("D" & 47 + 15 * v & ":H" & 47 + 15 * v).Value = resSlaPrcnt_Inc
+    Range("D" & 48 + 15 * v & ":H" & 48 + 15 * v).Value = avgClosure_Inc
+    '----------Service Request----------
+    Range("I" & 34 + 15 * v & ":M" & 34 + 15 * v).Value = opnBal_Srq
+    Range("I" & 35 + 15 * v & ":M" & 35 + 15 * v).Value = recvd_Srq
+    Range("I" & 36 + 15 * v & ":M" & 36 + 15 * v).Value = carried_Srq
+    Range("I" & 37 + 15 * v & ":M" & 37 + 15 * v).Value = closed_Srq
+    Range("I" & 38 + 15 * v & ":M" & 38 + 15 * v).Value = reOpen_Srq
+    Range("I" & 39 + 15 * v & ":M" & 39 + 15 * v).Value = totEff_Srq
+    Range("I" & 40 + 15 * v & ":M" & 40 + 15 * v).Value = avgEff_Srq
+    Cells(41 + 15 * v, 9).Value = tmSize_Srq
+    Range("I" & 44 + 15 * v & ":M" & 44 + 15 * v).Value = rspSla_Srq
+    Range("I" & 45 + 15 * v & ":M" & 45 + 15 * v).Value = rspSlaPrcnt_Srq
+    Range("I" & 46 + 15 * v & ":M" & 46 + 15 * v).Value = resSla_Srq
+    Range("I" & 47 + 15 * v & ":M" & 47 + 15 * v).Value = resSlaPrcnt_Srq
+    Range("I" & 48 + 15 * v & ":M" & 48 + 15 * v).Value = avgClosure_Srq
+    '----------Problem----------
+    Range("N" & 34 + 15 * v & ":R" & 34 + 15 * v).Value = opnBal_Prb
+    Range("N" & 35 + 15 * v & ":R" & 35 + 15 * v).Value = recvd_Prb
+    Range("N" & 36 + 15 * v & ":R" & 36 + 15 * v).Value = carried_Prb
+    Range("N" & 37 + 15 * v & ":R" & 37 + 15 * v).Value = closed_Prb
+    Range("N" & 38 + 15 * v & ":R" & 38 + 15 * v).Value = reOpen_Prb
+    Range("N" & 39 + 15 * v & ":R" & 39 + 15 * v).Value = totEff_Prb
+    Range("N" & 40 + 15 * v & ":R" & 40 + 15 * v).Value = avgEff_Prb
+    Cells(41 + 15 * v, 14).Value = tmSize_Prb
+    Range("N" & 44 + 15 * v & ":R" & 44 + 15 * v).Value = rspSla_Prb
+    Range("N" & 45 + 15 * v & ":R" & 45 + 15 * v).Value = rspSlaPrcnt_Prb
+    Range("N" & 46 + 15 * v & ":R" & 46 + 15 * v).Value = resSla_Prb
+    Range("N" & 47 + 15 * v & ":R" & 47 + 15 * v).Value = resSlaPrcnt_Prb
+    Range("N" & 48 + 15 * v & ":R" & 48 + 15 * v).Value = avgClosure_Prb
+    '----------Change Req----------
+    Range("S" & 34 + 15 * v & ":W" & 34 + 15 * v).Value = opnBal_Chg
+    Range("S" & 35 + 15 * v & ":W" & 35 + 15 * v).Value = recvd_Chg
+    Range("S" & 36 + 15 * v & ":W" & 36 + 15 * v).Value = carried_Chg
+    Range("S" & 37 + 15 * v & ":W" & 37 + 15 * v).Value = closed_Chg
+    Range("S" & 38 + 15 * v & ":W" & 38 + 15 * v).Value = reOpen_Chg
+    Range("S" & 39 + 15 * v & ":W" & 39 + 15 * v).Value = totEff_Chg
+    Range("S" & 40 + 15 * v & ":W" & 40 + 15 * v).Value = avgEff_Chg
+    Cells(41 + 15 * v, 19).Value = tmSize_Chg
+    Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
+    Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
+    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & " - " & quarters(v, 1)
+    
+End Sub
+Sub ticketCountAll(ByVal v As Integer)
+'========================================================================================================
+' TicketCountAll
+' -------------------------------------------------------------------------------------------------------
+' Purpose   :   To get no. of Tickets depending on conditions from Data File to Dashboard .
+'
+' Author    :   Subhankar Paul, 11th January, 2018
+' Notes     :   . Different Ticket Types: 'INC', 'SRQ', 'ACT', 'PRB' are string constant
+'               . 4 parameters are calculated at the end of the count are
+'                 Avg Effort, ResponseSLA %, ResolutionSLA % & Avg Closure Duration
+'               . The value placement in Excel Cells are flexible with versions
+' Parameter :   team,v - team and quarter wise the procedure will be called repeatedly, v is the row no. of
+'               quarter array
+' Returns   :   N/A
+' ---------------------------------------------------------------
+' Revision History
+'========================================================================================================
+    Application.ScreenUpdating = False
+    Application.DisplayAlerts = False
+    
+    '----------Incident----------
+    Dim opnBal_Inc(4) As Integer
+    Dim recvd_Inc(4) As Integer
+    Dim carried_Inc(4) As Integer
+    Dim closed_Inc(4) As Integer
+    Dim reOpen_Inc(4) As Integer
+    Dim totEff_Inc(4) As Long
+    Dim avgEff_Inc(4) As Integer
+    Dim tmSize_Inc As Integer
+    Dim rspSla_Inc(4) As Integer
+    Dim rspSlaPrcnt_Inc(4) As Integer
+    Dim resSla_Inc(4) As Integer
+    Dim resSlaPrcnt_Inc(4) As Integer
+    Dim cloDur_Inc(4) As Long
+    Dim avgClosure_Inc(4) As Integer
+    '--------Service Request--------
+    Dim opnBal_Srq(4) As Integer
+    Dim recvd_Srq(4) As Integer
+    Dim carried_Srq(4) As Integer
+    Dim closed_Srq(4) As Integer
+    Dim reOpen_Srq(4) As Integer
+    Dim totEff_Srq(4) As Long
+    Dim avgEff_Srq(4) As Integer
+    Dim tmSize_Srq As Integer
+    Dim rspSla_Srq(4) As Integer
+    Dim rspSlaPrcnt_Srq(4) As Integer
+    Dim resSla_Srq(4) As Integer
+    Dim resSlaPrcnt_Srq(4) As Integer
+    Dim cloDur_Srq(4) As Long
+    Dim avgClosure_Srq(4) As Integer
+    '--------Problem Statement--------
+    Dim opnBal_Prb(4) As Integer
+    Dim recvd_Prb(4) As Integer
+    Dim carried_Prb(4) As Integer
+    Dim closed_Prb(4) As Integer
+    Dim reOpen_Prb(4) As Integer
+    Dim totEff_Prb(4) As Long
+    Dim avgEff_Prb(4) As Integer
+    Dim tmSize_Prb As Integer
+    Dim rspSla_Prb(4) As Integer
+    Dim rspSlaPrcnt_Prb(4) As Integer
+    Dim resSla_Prb(4) As Integer
+    Dim resSlaPrcnt_Prb(4) As Integer
+    Dim cloDur_Prb(4) As Long
+    Dim avgClosure_Prb(4) As Integer
+    '--------Change Request--------
+    Dim opnBal_Chg(4) As Integer
+    Dim recvd_Chg(4) As Integer
+    Dim carried_Chg(4) As Integer
+    Dim closed_Chg(4) As Integer
+    Dim reOpen_Chg(4) As Integer
+    Dim totEff_Chg(4) As Long
+    Dim avgEff_Chg(4) As Integer
+    Dim tmSize_Chg As Integer
+    Dim winMiss_Chg(4) As Integer
+    Dim winMissPrcnt_Chg(4) As Integer
+    '---- variables to store the required values of each record for computation -----
+    Dim Data_rowCount As Long
+    Dim Data_i As Long
+    Dim j As Long
+    
+    Dim tkt_type As String
+    Dim reOpnd As String
+    Dim rspSLA As String
+    Dim resSLA As String
+    Dim prty As Integer
+    Dim effort As Double
+    Dim createDate As Long
+    Dim finishDate As Long
+    '------------ Dictionary Creation for Distinct Count of Assigned resource --
+    Dim INC_Dict, CHG_Dict, SRQ_Dict, PRB_Dict As Object
+    Set INC_Dict = CreateObject("scripting.dictionary")
+    Set CHG_Dict = CreateObject("scripting.dictionary")
+    Set SRQ_Dict = CreateObject("scripting.dictionary")
+    Set PRB_Dict = CreateObject("scripting.dictionary")
+    
+    
+    Dim startDate As Long
+    Dim endDate As Long
+    
+    WS_DA.Select
 
-Call Trans_SRQ_ver2
-Call Trans_INC_ver2
-Call Trans_PRB_ver2
-Call Trans_ACT_ver2
-Call Atlas_SRQ_ver2
-Call Atlas_INC_ver2
-Call Atlas_PRB_ver2
-Call Atlas_ACT_ver2
+    'parameter v is used to get the quarter version
+    startDate = CLng(quarters(v, 0))
+    endDate = CLng(quarters(v, 1))
+    
+    Data_rowCount = ActiveSheet.Cells(Rows.Count, "A").End(xlUp).Row
 
-Call Trans_SRQ_ver3
-Call Trans_INC_ver3
-Call Trans_PRB_ver3
-Call Trans_ACT_ver3
-Call Atlas_SRQ_ver3
-Call Atlas_INC_ver3
-Call Atlas_PRB_ver3
-Call Atlas_ACT_ver3
-
-Call Trans_SRQ_ver4
-Call Trans_INC_ver4
-Call Trans_PRB_ver4
-Call Trans_ACT_ver4
-Call Atlas_SRQ_ver4
-Call Atlas_INC_ver4
-Call Atlas_PRB_ver4
-Call Atlas_ACT_ver4
-
-
-End Sub
-
-Sub Trans_SRQ_ver1()
+    For Data_i = 2 To Data_rowCount
+            tkt_type = Cells(Data_i, 1).Value ' Ticket Type
+            prty = Cells(Data_i, 12).Value ' Priority
+            createDate = Cells(Data_i, 23).Value
+            finishDate = Cells(Data_i, 25).Value
+            reOpnd = Cells(Data_i, 18).Value
+            rspSLA = Cells(Data_i, 2).Value
+            resSLA = Cells(Data_i, 3).Value
+            Select Case tkt_type
+                'If Incident ticket type
+                Case "INC"
+                    If INC_Dict.Exists(element) Then
+                        INC_Dict.Item(element) = INC_Dict.Item(element) + 1
+                    Else
+                        INC_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Opening Balance:
+                            opnBal_Inc(0) = opnBal_Inc(0) + 1
+                            'CarryForward
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(0) = recvd_Inc(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Inc(0) = rspSla_Inc(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(0) = reOpen_Inc(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(0) = carried_Inc(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(0) = closed_Inc(0) + 1
+                                'Total Effort Spent
+                                totEff_Inc(0) = totEff_Inc(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Inc(0) = cloDur_Inc(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Inc(0) = resSla_Inc(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Inc(1) = opnBal_Inc(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(1) = carried_Inc(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(1) = closed_Inc(1) + 1
+                                totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
+                                cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(1) = resSla_Inc(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(1) = recvd_Inc(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(1) = rspSla_Inc(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(1) = reOpen_Inc(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(1) = carried_Inc(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(1) = closed_Inc(1) + 1
+                                totEff_Inc(1) = totEff_Inc(1) + Cells(Data_i, 13).Value
+                                cloDur_Inc(1) = cloDur_Inc(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(1) = resSla_Inc(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Inc(2) = opnBal_Inc(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(2) = carried_Inc(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(2) = closed_Inc(2) + 1
+                                totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
+                                cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(2) = resSla_Inc(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(2) = recvd_Inc(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(2) = rspSla_Inc(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(2) = reOpen_Inc(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(2) = carried_Inc(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(2) = closed_Inc(2) + 1
+                                totEff_Inc(2) = totEff_Inc(2) + Cells(Data_i, 13).Value
+                                cloDur_Inc(2) = cloDur_Inc(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(2) = resSla_Inc(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Inc(3) = opnBal_Inc(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(3) = recvd_Inc(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(3) = rspSla_Inc(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(3) = reOpen_Inc(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Inc(3) = opnBal_Inc(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Inc(3) = recvd_Inc(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Inc(3) = rspSla_Inc(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Inc(3) = reOpen_Inc(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Inc(3) = carried_Inc(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Inc(3) = closed_Inc(3) + 1
+                                totEff_Inc(3) = totEff_Inc(3) + Cells(Data_i, 13).Value
+                                cloDur_Inc(3) = cloDur_Inc(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Inc(3) = resSla_Inc(3) + 1
+                                End If
+                            End If
+                        End If
+                End Select
+'If ticket type = SRQ
+                Case "SRQ"
+                    If SRQ_Dict.Exists(element) Then
+                        SRQ_Dict.Item(element) = SRQ_Dict.Item(element) + 1
+                    Else
+                        SRQ_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Srq(0) = opnBal_Srq(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(0) = carried_Srq(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(0) = closed_Srq(0) + 1
+                                'Total Effort Spent
+                                totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Srq(0) = resSla_Srq(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(0) = recvd_Srq(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Srq(0) = rspSla_Srq(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(0) = reOpen_Srq(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(0) = carried_Srq(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(0) = closed_Srq(0) + 1
+                                'Total Effort Spent
+                                totEff_Srq(0) = totEff_Srq(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Srq(0) = cloDur_Srq(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Srq(0) = resSla_Srq(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Srq(1) = opnBal_Srq(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(1) = carried_Srq(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(1) = closed_Srq(1) + 1
+                                totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
+                                cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(1) = resSla_Srq(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(1) = recvd_Srq(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(1) = rspSla_Srq(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(1) = reOpen_Srq(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(1) = carried_Srq(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(1) = closed_Srq(1) + 1
+                                totEff_Srq(1) = totEff_Srq(1) + Cells(Data_i, 13).Value
+                                cloDur_Srq(1) = cloDur_Srq(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(1) = resSla_Srq(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Srq(2) = opnBal_Srq(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(2) = carried_Srq(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(2) = closed_Srq(2) + 1
+                                totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
+                                cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(2) = resSla_Srq(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(2) = recvd_Srq(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(2) = rspSla_Srq(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(2) = reOpen_Srq(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(2) = carried_Srq(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(2) = closed_Srq(2) + 1
+                                totEff_Srq(2) = totEff_Srq(2) + Cells(Data_i, 13).Value
+                                cloDur_Srq(2) = cloDur_Srq(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(2) = resSla_Srq(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(3) = recvd_Srq(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(3) = rspSla_Srq(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(3) = reOpen_Srq(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Srq(3) = opnBal_Srq(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Srq(3) = recvd_Srq(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Srq(3) = rspSla_Srq(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Srq(3) = reOpen_Srq(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Srq(3) = carried_Srq(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Srq(3) = closed_Srq(3) + 1
+                                totEff_Srq(3) = totEff_Srq(3) + Cells(Data_i, 13).Value
+                                cloDur_Srq(3) = cloDur_Srq(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Srq(3) = resSla_Srq(3) + 1
+                                End If
+                            End If
+                        End If
+                    End Select
+'If ticket type = PRB
+                Case "PRB"
+                    If PRB_Dict.Exists(element) Then
+                        PRB_Dict.Item(element) = PRB_Dict.Item(element) + 1
+                    Else
+                        PRB_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Prb(0) = opnBal_Prb(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(0) = carried_Prb(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(0) = closed_Prb(0) + 1
+                                'Total Effort Spent
+                                totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Prb(0) = resSla_Prb(0) + 1
+                                End If
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(0) = recvd_Prb(0) + 1
+                            If rspSLA = "N" Then
+                                'Total Response SLA Breached
+                                rspSla_Prb(0) = rspSla_Prb(0) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(0) = reOpen_Prb(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(0) = carried_Prb(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(0) = closed_Prb(0) + 1
+                                'Total Effort Spent
+                                totEff_Prb(0) = totEff_Prb(0) + Cells(Data_i, 13).Value
+                                'Total Closure Duration
+                                cloDur_Prb(0) = cloDur_Prb(0) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    'Total Resolution SLA Breached
+                                    resSla_Prb(0) = resSla_Prb(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Prb(1) = opnBal_Prb(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(1) = carried_Prb(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(1) = closed_Prb(1) + 1
+                                totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
+                                cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(1) = resSla_Prb(1) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(1) = recvd_Prb(1) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(1) = rspSla_Prb(1) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(1) = reOpen_Prb(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(1) = carried_Prb(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(1) = closed_Prb(1) + 1
+                                totEff_Prb(1) = totEff_Prb(1) + Cells(Data_i, 13).Value
+                                cloDur_Prb(1) = cloDur_Prb(1) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(1) = resSla_Prb(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Prb(2) = opnBal_Prb(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(2) = carried_Prb(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(2) = closed_Prb(2) + 1
+                                totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
+                                cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(2) = resSla_Prb(2) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(2) = recvd_Prb(2) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(2) = rspSla_Prb(2) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(2) = reOpen_Prb(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(2) = carried_Prb(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(2) = closed_Prb(2) + 1
+                                totEff_Prb(2) = totEff_Prb(2) + Cells(Data_i, 13).Value
+                                cloDur_Prb(2) = cloDur_Prb(2) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(2) = resSla_Prb(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Prb(3) = opnBal_Prb(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(3) = recvd_Prb(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(3) = rspSla_Prb(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(3) = reOpen_Prb(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Prb(3) = opnBal_Prb(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Prb(3) = recvd_Prb(3) + 1
+                            If rspSLA = "N" Then
+                                rspSla_Prb(3) = rspSla_Prb(3) + 1
+                            End If
+                            If reOpnd = "Y" Then
+                                reOpen_Prb(3) = reOpen_Prb(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Prb(3) = carried_Prb(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Prb(3) = closed_Prb(3) + 1
+                                totEff_Prb(3) = totEff_Prb(3) + Cells(Data_i, 13).Value
+                                cloDur_Prb(3) = cloDur_Prb(3) + Cells(Data_i, 19).Value
+                                If resSLA = "N" Then
+                                    resSla_Prb(3) = resSla_Prb(3) + 1
+                                End If
+                            End If
+                        End If
+                End Select
+                'If ticket type = CHG
+                Case "ACT"
+                    If CHG_Dict.Exists(element) Then
+                        CHG_Dict.Item(element) = CHG_Dict.Item(element) + 1
+                    Else
+                        CHG_Dict.Add element, 1
+                    End If
+                Select Case prty
+                    'Priority 1 and so on same for below also
+                    Case 1
+                        '------------------ Filtering Data for Quarter ----------------------
+                        'Opening balance: finish date = "" and create Date <= Start Date
+                        If createDate < startDate Then
+                            'Carried Forward & Opening Balance:
+                            opnBal_Chg(0) = opnBal_Chg(0) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(0) = carried_Chg(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(0) = closed_Chg(0) + 1
+                                'Total Effort Spent
+                                totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
+                            End If
+                        'Received: end_Date >= 'Create Date' >= start_Date
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(0) = recvd_Chg(0) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(0) = reOpen_Chg(0) + 1
+                            End If
+                            'Carried Forward:
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(0) = carried_Chg(0) + 1
+                            'Resolved: end_Date >= 'Finish Date' >= start_Date
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(0) = closed_Chg(0) + 1
+                                'Total Effort Spent
+                                totEff_Chg(0) = totEff_Chg(0) + Cells(Data_i, 13).Value
+                                'Change Window missed implemented
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(0) = winMiss_Chg(0) + 1
+                                End If
+                            End If
+                        End If
+                    Case 2
+                        If createDate < startDate Then
+                            opnBal_Chg(1) = opnBal_Chg(1) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(1) = carried_Chg(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(1) = closed_Chg(1) + 1
+                                totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(1) = recvd_Chg(1) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(1) = reOpen_Chg(1) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(1) = carried_Chg(1) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(1) = closed_Chg(1) + 1
+                                totEff_Chg(1) = totEff_Chg(1) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(1) = winMiss_Chg(1) + 1
+                                End If
+                            End If
+                        End If
+                    Case 3
+                        If createDate < startDate Then
+                            opnBal_Chg(2) = opnBal_Chg(2) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(2) = carried_Chg(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(2) = closed_Chg(2) + 1
+                                totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(2) = recvd_Chg(2) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(2) = reOpen_Chg(2) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(2) = carried_Chg(2) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(2) = closed_Chg(2) + 1
+                                totEff_Chg(2) = totEff_Chg(2) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(2) = winMiss_Chg(2) + 1
+                                End If
+                            End If
+                        End If
+                    Case 4
+                        If createDate < startDate Then
+                            opnBal_Chg(3) = opnBal_Chg(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(3) = recvd_Chg(3) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(3) = reOpen_Chg(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(3) = winMiss_Chg(0) + 1
+                                End If
+                            End If
+                        End If
+'************* Case 4 and Case 5 both sharing same variables ***************
+                    Case 5
+                        If createDate < startDate Then
+                            opnBal_Chg(3) = opnBal_Chg(3) + 1
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                            End If
+                        ElseIf createDate >= startDate And finishDate <= endDate Then
+                            recvd_Chg(3) = recvd_Chg(3) + 1
+                            If reOpnd = "Y" Then
+                                reOpen_Chg(3) = reOpen_Chg(3) + 1
+                            End If
+                            If CStr(finishDate) = "" Or finishDate > endDate Then
+                                carried_Chg(3) = carried_Chg(3) + 1
+                            ElseIf finishDate >= startDate And finishDate <= endDate Then
+                                closed_Chg(3) = closed_Chg(3) + 1
+                                totEff_Chg(3) = totEff_Chg(3) + Cells(Data_i, 13).Value
+                                If finishDate < Cells(Data_i, 16).Value And finishDate > Cells(Data_i, 17).Value Then
+                                    winMiss_Chg(3) = winMiss_Chg(3) + 1
+                                End If
+                            End If
+                        End If
+                End Select
+            End Select
+    Next Data_i
+    ' Total of the following variables are calculated
+    For i = 0 To 3
+        opnBal_Inc(4) = opnBal_Inc(4) + opnBal_Inc(i)
+        recvd_Inc(4) = recvd_Inc(4) + recvd_Inc(i)
+        carried_Inc(4) = carried_Inc(4) + carried_Inc(i)
+        closed_Inc(4) = closed_Inc(4) + closed_Inc(i)
+        reOpen_Inc(4) = reOpen_Inc(4) + reOpen_Inc(i)
+        totEff_Inc(4) = totEff_Inc(4) + totEff_Inc(i)
+        rspSla_Inc(4) = rspSla_Inc(4) + rspSla_Inc(i)
+        resSla_Inc(4) = resSla_Inc(4) + resSla_Inc(i)
+        cloDur_Inc(4) = cloDur_Inc(4) + cloDur_Inc(i)
+        
+        opnBal_Srq(4) = opnBal_Srq(4) + opnBal_Srq(i)
+        recvd_Srq(4) = recvd_Srq(4) + recvd_Srq(i)
+        carried_Srq(4) = carried_Srq(4) + carried_Srq(i)
+        closed_Srq(4) = closed_Srq(4) + closed_Srq(i)
+        reOpen_Srq(4) = reOpen_Srq(4) + reOpen_Srq(i)
+        totEff_Srq(4) = totEff_Srq(4) + totEff_Srq(i)
+        rspSla_Srq(4) = rspSla_Srq(4) + rspSla_Srq(i)
+        resSla_Srq(4) = resSla_Srq(4) + resSla_Srq(i)
+        cloDur_Srq(4) = cloDur_Srq(4) + cloDur_Srq(i)
+        
+        opnBal_Prb(4) = opnBal_Prb(4) + opnBal_Prb(i)
+        recvd_Prb(4) = recvd_Prb(4) + recvd_Prb(i)
+        carried_Prb(4) = carried_Prb(4) + carried_Prb(i)
+        closed_Prb(4) = closed_Prb(4) + closed_Prb(i)
+        reOpen_Prb(4) = reOpen_Prb(4) + reOpen_Prb(i)
+        totEff_Prb(4) = totEff_Prb(4) + totEff_Prb(i)
+        rspSla_Prb(4) = rspSla_Prb(4) + rspSla_Prb(i)
+        resSla_Prb(4) = resSla_Prb(4) + resSla_Prb(i)
+        cloDur_Prb(4) = cloDur_Prb(4) + cloDur_Prb(i)
+        
+        opnBal_Chg(4) = opnBal_Chg(4) + opnBal_Chg(i)
+        recvd_Chg(4) = recvd_Chg(4) + recvd_Chg(i)
+        carried_Chg(4) = carried_Chg(4) + carried_Chg(i)
+        closed_Chg(4) = closed_Chg(4) + closed_Chg(i)
+        reOpen_Chg(4) = reOpen_Chg(4) + reOpen_Chg(i)
+        totEff_Chg(4) = totEff_Chg(4) + totEff_Chg(i)
+        winMiss_Chg(4) = winMiss_Chg(4) + winMiss_Chg(i)
+    Next i
+    'average is being calculated here
+    For i = 0 To 4
+        If closed_Inc(i) <> 0 Then
+            avgEff_Inc(i) = totEff_Inc(i) / closed_Inc(i)
+            resSlaPrcnt_Inc(i) = resSla_Inc(i) * 100 / closed_Inc(i)
+            avgClosure_Inc(i) = cloDur_Inc(i) / closed_Inc(i)
+        End If
+        If closed_Srq(i) <> 0 Then
+            avgEff_Srq(i) = totEff_Srq(i) / closed_Srq(i)
+            resSlaPrcnt_Srq(i) = resSla_Srq(i) * 100 / closed_Srq(i)
+            avgClosure_Srq(i) = cloDur_Srq(i) / closed_Srq(i)
+        End If
+        If closed_Prb(i) <> 0 Then
+            avgEff_Prb(i) = totEff_Prb(i) / closed_Prb(i)
+            resSlaPrcnt_Prb(i) = resSla_Prb(i) * 100 / closed_Prb(i)
+            avgClosure_Prb(i) = cloDur_Prb(i) / closed_Prb(i)
+        End If
+        If closed_Chg(i) <> 0 Then
+            avgEff_Chg(i) = totEff_Chg(i) / closed_Chg(i)
+            winMissPrcnt_Chg(i) = winMiss_Chg(i) * 100 / closed_Chg(i)
+        End If
+        
+        If recvd_Inc(i) <> 0 Then
+            rspSlaPrcnt_Inc(i) = rspSla_Inc(i) * 100 / recvd_Inc(i)
+        End If
+        If recvd_Srq(i) <> 0 Then
+            rspSlaPrcnt_Srq(i) = rspSla_Srq(i) * 100 / recvd_Srq(i)
+        End If
+        If recvd_Prb(i) <> 0 Then
+            rspSlaPrcnt_Prb(i) = rspSla_Prb(i) * 100 / recvd_Prb(i)
+        End If
+    Next i
     
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer/
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 2).Value = Count
-     '   Sheets("Summary").Cells(4, 14).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 2).Value = Count
-        Sheets("Summary").Cells(5, 14).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 2).Value = Count
-        Sheets("Summary").Cells(6, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 2).Value = Count
-        Sheets("Summary").Cells(7, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 2).Value = Count
-        Sheets("Summary").Cells(8, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 2).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 2).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 2).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
+    'Checking Whether Dictionary contains Blank String
+    If INC_Dict.Exists("") Then
+        tmSize_Inc = INC_Dict.Count - 1
+    End If
+    If SRQ_Dict.Exists("") Then
+        tmSize_Srq = SRQ_Dict.Count - 1
+    End If
+    If CHG_Dict.Exists("") Then
+        tmSize_Chg = CHG_Dict.Count - 1
+    End If
+    If PRB_Dict.Exists("") Then
+        tmSize_Prb = PRB_Dict.Count - 1
+    End If
     
-End Sub
-Sub Trans_INC_ver1()
     
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 2).Value = Count
-        Sheets("Summary").Cells(10, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 2).Value = Count
-        Sheets("Summary").Cells(11, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 2).Value = Count
-        Sheets("Summary").Cells(12, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 2).Value = Count
-        Sheets("Summary").Cells(13, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 2).Value = Count
-        Sheets("Summary").Cells(14, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 2).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 2).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 2).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
+    WS_CSS.Select
     
-End Sub
-Sub Trans_PRB_ver1()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 2).Value = Count
-        Sheets("Summary").Cells(16, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 2).Value = Count
-        Sheets("Summary").Cells(17, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 2).Value = Count
-        Sheets("Summary").Cells(18, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 2).Value = Count
-        Sheets("Summary").Cells(19, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 2).Value = Count
-        Sheets("Summary").Cells(20, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 2).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 2).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 2).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Trans_ACT_ver1()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 2).Value = Count
-        Sheets("Summary").Cells(22, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 2).Value = Count
-        Sheets("Summary").Cells(23, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 2).Value = Count
-        Sheets("Summary").Cells(24, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 2).Value = Count
-        Sheets("Summary").Cells(25, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 2).Value = Count
-        Sheets("Summary").Cells(26, 14).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 2).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 2).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 2).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_SRQ_ver1()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 7).Value = Count
-        Sheets("Summary").Cells(4, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 7).Value = Count
-        Sheets("Summary").Cells(5, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 7).Value = Count
-        Sheets("Summary").Cells(6, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 7).Value = Count
-        Sheets("Summary").Cells(7, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 7).Value = Count
-        Sheets("Summary").Cells(8, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 7).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 7).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 7).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_INC_ver1()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 7).Value = Count
-        Sheets("Summary").Cells(10, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 7).Value = Count
-        Sheets("Summary").Cells(11, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 7).Value = Count
-        Sheets("Summary").Cells(12, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 7).Value = Count
-        Sheets("Summary").Cells(13, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 7).Value = Count
-        Sheets("Summary").Cells(14, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 7).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 7).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 7).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_PRB_ver1()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 7).Value = Count
-        Sheets("Summary").Cells(16, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 7).Value = Count
-        Sheets("Summary").Cells(17, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 7).Value = Count
-        Sheets("Summary").Cells(18, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 7).Value = Count
-        Sheets("Summary").Cells(19, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 7).Value = Count
-        Sheets("Summary").Cells(20, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 7).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 7).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 7).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_ACT_ver1()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 7).Value = Count
-        Sheets("Summary").Cells(22, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 7).Value = Count
-        Sheets("Summary").Cells(23, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 7).Value = Count
-        Sheets("Summary").Cells(24, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 7).Value = Count
-        Sheets("Summary").Cells(25, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 7).Value = Count
-        Sheets("Summary").Cells(26, 19).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver1_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 7).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver1_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver1_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 7).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver1_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver1_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 7).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_SRQ_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer/
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 3).Value = Count
-        Sheets("Summary").Cells(4, 15).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 3).Value = Count
-        Sheets("Summary").Cells(5, 15).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 3).Value = Count
-        Sheets("Summary").Cells(6, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 3).Value = Count
-        Sheets("Summary").Cells(7, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 3).Value = Count
-        Sheets("Summary").Cells(8, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 3).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 3).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 3).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_INC_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 3).Value = Count
-        Sheets("Summary").Cells(10, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 3).Value = Count
-        Sheets("Summary").Cells(11, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 3).Value = Count
-        Sheets("Summary").Cells(12, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 3).Value = Count
-        Sheets("Summary").Cells(13, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 3).Value = Count
-        Sheets("Summary").Cells(14, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 3).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 3).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 3).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_PRB_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 3).Value = Count
-        Sheets("Summary").Cells(16, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 3).Value = Count
-        Sheets("Summary").Cells(17, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 3).Value = Count
-        Sheets("Summary").Cells(18, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 3).Value = Count
-        Sheets("Summary").Cells(19, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 3).Value = Count
-        Sheets("Summary").Cells(20, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 3).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 3).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 3).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Trans_ACT_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 3).Value = Count
-        Sheets("Summary").Cells(22, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 3).Value = Count
-        Sheets("Summary").Cells(23, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 3).Value = Count
-        Sheets("Summary").Cells(24, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 3).Value = Count
-        Sheets("Summary").Cells(25, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 3).Value = Count
-        Sheets("Summary").Cells(26, 15).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 3).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 3).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 3).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_SRQ_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 8).Value = Count
-        Sheets("Summary").Cells(4, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 8).Value = Count
-        Sheets("Summary").Cells(5, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 8).Value = Count
-        Sheets("Summary").Cells(6, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 8).Value = Count
-        Sheets("Summary").Cells(7, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 8).Value = Count
-        Sheets("Summary").Cells(8, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 8).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 8).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 8).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_INC_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 8).Value = Count
-        Sheets("Summary").Cells(10, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 8).Value = Count
-        Sheets("Summary").Cells(11, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 8).Value = Count
-        Sheets("Summary").Cells(12, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 8).Value = Count
-        Sheets("Summary").Cells(13, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 8).Value = Count
-        Sheets("Summary").Cells(14, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 8).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 8).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 8).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_PRB_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 8).Value = Count
-        Sheets("Summary").Cells(16, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 8).Value = Count
-        Sheets("Summary").Cells(17, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 8).Value = Count
-        Sheets("Summary").Cells(18, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 8).Value = Count
-        Sheets("Summary").Cells(19, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 8).Value = Count
-        Sheets("Summary").Cells(20, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 8).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 8).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 8).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_ACT_ver2()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 8).Value = Count
-        Sheets("Summary").Cells(22, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 8).Value = Count
-        Sheets("Summary").Cells(23, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 8).Value = Count
-        Sheets("Summary").Cells(24, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 8).Value = Count
-        Sheets("Summary").Cells(25, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 8).Value = Count
-        Sheets("Summary").Cells(26, 20).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver2_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 8).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver2_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver2_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 8).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver2_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver2_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 8).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Trans_SRQ_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer/
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 4).Value = Count
-        Sheets("Summary").Cells(4, 16).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 4).Value = Count
-        Sheets("Summary").Cells(5, 16).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 4).Value = Count
-        Sheets("Summary").Cells(6, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 4).Value = Count
-        Sheets("Summary").Cells(7, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 4).Value = Count
-        Sheets("Summary").Cells(8, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 4).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 4).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 4).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_INC_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 4).Value = Count
-        Sheets("Summary").Cells(10, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 4).Value = Count
-        Sheets("Summary").Cells(11, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 4).Value = Count
-        Sheets("Summary").Cells(12, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 4).Value = Count
-        Sheets("Summary").Cells(13, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 4).Value = Count
-        Sheets("Summary").Cells(14, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 4).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 4).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 4).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_PRB_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 4).Value = Count
-        Sheets("Summary").Cells(16, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 4).Value = Count
-        Sheets("Summary").Cells(17, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 4).Value = Count
-        Sheets("Summary").Cells(18, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 4).Value = Count
-        Sheets("Summary").Cells(19, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 4).Value = Count
-        Sheets("Summary").Cells(20, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 4).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 4).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 4).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Trans_ACT_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 4).Value = Count
-        Sheets("Summary").Cells(22, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 4).Value = Count
-        Sheets("Summary").Cells(23, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 4).Value = Count
-        Sheets("Summary").Cells(24, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 4).Value = Count
-        Sheets("Summary").Cells(25, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 4).Value = Count
-        Sheets("Summary").Cells(26, 16).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 4).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 4).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 4).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_SRQ_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 9).Value = Count
-        Sheets("Summary").Cells(4, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 9).Value = Count
-        Sheets("Summary").Cells(5, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 9).Value = Count
-        Sheets("Summary").Cells(6, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 9).Value = Count
-        Sheets("Summary").Cells(7, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 9).Value = Count
-        Sheets("Summary").Cells(8, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 9).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 9).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 9).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_INC_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 9).Value = Count
-        Sheets("Summary").Cells(10, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 9).Value = Count
-        Sheets("Summary").Cells(11, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 9).Value = Count
-        Sheets("Summary").Cells(12, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 9).Value = Count
-        Sheets("Summary").Cells(13, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 9).Value = Count
-        Sheets("Summary").Cells(14, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 9).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 9).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 9).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_PRB_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 9).Value = Count
-        Sheets("Summary").Cells(16, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 9).Value = Count
-        Sheets("Summary").Cells(17, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 9).Value = Count
-        Sheets("Summary").Cells(18, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 9).Value = Count
-        Sheets("Summary").Cells(19, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 9).Value = Count
-        Sheets("Summary").Cells(20, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 9).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 9).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 9).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_ACT_ver3()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 9).Value = Count
-        Sheets("Summary").Cells(22, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 9).Value = Count
-        Sheets("Summary").Cells(23, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 9).Value = Count
-        Sheets("Summary").Cells(24, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 9).Value = Count
-        Sheets("Summary").Cells(25, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 9).Value = Count
-        Sheets("Summary").Cells(26, 21).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver3_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 9).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver3_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver3_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 9).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver3_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver3_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 9).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_SRQ_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer/
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 5).Value = Count
-        Sheets("Summary").Cells(4, 17).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 5).Value = Count
-        Sheets("Summary").Cells(5, 17).Value = WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 5).Value = Count
-        Sheets("Summary").Cells(6, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 5).Value = Count
-        Sheets("Summary").Cells(7, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 5).Value = Count
-        Sheets("Summary").Cells(8, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 5).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 5).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 5).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_INC_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 5).Value = Count
-        Sheets("Summary").Cells(10, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 5).Value = Count
-        Sheets("Summary").Cells(11, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 5).Value = Count
-        Sheets("Summary").Cells(12, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 5).Value = Count
-        Sheets("Summary").Cells(13, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 5).Value = Count
-        Sheets("Summary").Cells(14, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 5).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 5).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 5).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Trans_PRB_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 5).Value = Count
-        Sheets("Summary").Cells(16, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 5).Value = Count
-        Sheets("Summary").Cells(17, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 5).Value = Count
-        Sheets("Summary").Cells(18, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 5).Value = Count
-        Sheets("Summary").Cells(19, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 5).Value = Count
-        Sheets("Summary").Cells(20, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 5).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 5).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 5).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Trans_ACT_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Transformer
-    .AutoFilter Field:=9, Criteria1:="Transformers"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 5).Value = Count
-        Sheets("Summary").Cells(22, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 5).Value = Count
-        Sheets("Summary").Cells(23, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 5).Value = Count
-        Sheets("Summary").Cells(24, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 5).Value = Count
-        Sheets("Summary").Cells(25, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 5).Value = Count
-        Sheets("Summary").Cells(26, 17).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 5).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 5).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 5).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_SRQ_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All SRQ Tickets
-    .AutoFilter Field:=2, Criteria1:="SRQ"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' SRQ-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(4, 10).Value = Count
-        Sheets("Summary").Cells(4, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(5, 10).Value = Count
-        Sheets("Summary").Cells(5, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        
-        ' SRQ-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(6, 10).Value = Count
-        Sheets("Summary").Cells(6, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-
-        ' SRQ-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(7, 10).Value = Count
-        Sheets("Summary").Cells(7, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' SRQ-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(10, 10).Value = Count
-        Sheets("Summary").Cells(8, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(8, 10).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' SRQ-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(9, 10).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' SRQ-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(11, 10).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_INC_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="INC"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' INC-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(14, 10).Value = Count
-        Sheets("Summary").Cells(10, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(15, 10).Value = Count
-        Sheets("Summary").Cells(11, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(16, 10).Value = Count
-        Sheets("Summary").Cells(12, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(17, 10).Value = Count
-        Sheets("Summary").Cells(13, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' INC-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(20, 10).Value = Count
-        Sheets("Summary").Cells(14, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(18, 10).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' INC-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(19, 10).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' INC-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(21, 10).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-Sub Atlas_PRB_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="PRB"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' PRB-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(24, 10).Value = Count
-        Sheets("Summary").Cells(16, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(25, 10).Value = Count
-        Sheets("Summary").Cells(17, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(26, 10).Value = Count
-        Sheets("Summary").Cells(18, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(27, 10).Value = Count
-        Sheets("Summary").Cells(19, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' PRB-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(30, 10).Value = Count
-        Sheets("Summary").Cells(20, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(28, 10).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' PRB-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(29, 10).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' PRB-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(31, 10).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
-    
-End Sub
-
-Sub Atlas_ACT_ver4()
-    
-    Sheets("Consolidated Report").Range("A1:S1").Select
-    Selection.AutoFilter
-    '------------------ Filtering Data for Version 1 ----------------------
-    With Selection
-    ' For All Atlas
-    .AutoFilter Field:=9, Criteria1:="Atlas"
-    ' For All INC Tickets
-    .AutoFilter Field:=2, Criteria1:="ACT"
-        ' For Resolved Ticket
-        ' end_Date >= 'Finish Date' >= start_Date
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        
-        ' ACT-P1_Resolved
-        .AutoFilter Field:=13, Criteria1:="1"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(34, 10).Value = Count
-        Sheets("Summary").Cells(22, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P2_Resolved
-        .AutoFilter Field:=13, Criteria1:="2"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(35, 10).Value = Count
-        Sheets("Summary").Cells(23, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P3_Resolved
-        .AutoFilter Field:=13, Criteria1:="3"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(36, 10).Value = Count
-        Sheets("Summary").Cells(24, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-P4 & P5 Resolved
-        .AutoFilter Field:=13, Criteria1:="4", Operator:=xlOr, Criteria2:="5"
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(37, 10).Value = Count
-        Sheets("Summary").Cells(25, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        ' ACT-Total_Resolved
-        .AutoFilter Field:=13
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(40, 10).Value = Count
-        Sheets("Summary").Cells(26, 22).Value = Application.WorksheetFunction.Sum(Rng.SpecialCells(xlCellTypeVisible))
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Opening Balance
-        .AutoFilter Field:=18, Criteria1:="<" & CLng(ver4_stDt)
-        .AutoFilter Field:=19, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(38, 10).Value = Count
-        
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-        ' ACT-Total_Received
-        .AutoFilter Field:=18, Criteria1:=">=" & CLng(ver4_stDt), Operator:=xlAnd, Criteria2:="<=" & CLng(ver4_enDt)
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(39, 10).Value = Count
-            
-        .AutoFilter Field:=18
-        
-        ' ACT-Total_Carry Forward
-        .AutoFilter Field:=18, Criteria1:="<=" & CLng(ver4_enDt)
-        .AutoFilter Field:=19, Criteria1:=">" & CLng(ver4_enDt), Operator:=xlOr, Criteria2:=""
-        Count = ActiveSheet.AutoFilter.Range.Columns(5). _
-                SpecialCells(xlCellTypeVisible).Count - 1
-        Sheets("Summary").Cells(41, 10).Value = Count
-        .AutoFilter Field:=18
-        .AutoFilter Field:=19
-        
-    End With
+    '------------------ VERSIONWISE Value Placement of the Variable in Excel sheet -------------
+    '----------Incident----------
+    Range("D" & 34 + 15 * v & ":H" & 34 + 15 * v).Value = opnBal_Inc
+    Range("D" & 35 + 15 * v & ":H" & 35 + 15 * v).Value = recvd_Inc
+    Range("D" & 36 + 15 * v & ":H" & 36 + 15 * v).Value = carried_Inc
+    Range("D" & 37 + 15 * v & ":H" & 37 + 15 * v).Value = closed_Inc
+    Range("D" & 38 + 15 * v & ":H" & 38 + 15 * v).Value = reOpen_Inc
+    Range("D" & 39 + 15 * v & ":H" & 39 + 15 * v).Value = totEff_Inc
+    Range("D" & 40 + 15 * v & ":H" & 40 + 15 * v).Value = avgEff_Inc
+    Cells(41 + 15 * v, 4).Value = tmSize_Inc
+    Range("D" & 44 + 15 * v & ":H" & 44 + 15 * v).Value = rspSla_Inc
+    Range("D" & 45 + 15 * v & ":H" & 45 + 15 * v).Value = rspSlaPrcnt_Inc
+    Range("D" & 46 + 15 * v & ":H" & 46 + 15 * v).Value = resSla_Inc
+    Range("D" & 47 + 15 * v & ":H" & 47 + 15 * v).Value = resSlaPrcnt_Inc
+    Range("D" & 48 + 15 * v & ":H" & 48 + 15 * v).Value = avgClosure_Inc
+    '----------Service Request----------
+    Range("I" & 34 + 15 * v & ":M" & 34 + 15 * v).Value = opnBal_Srq
+    Range("I" & 35 + 15 * v & ":M" & 35 + 15 * v).Value = recvd_Srq
+    Range("I" & 36 + 15 * v & ":M" & 36 + 15 * v).Value = carried_Srq
+    Range("I" & 37 + 15 * v & ":M" & 37 + 15 * v).Value = closed_Srq
+    Range("I" & 38 + 15 * v & ":M" & 38 + 15 * v).Value = reOpen_Srq
+    Range("I" & 39 + 15 * v & ":M" & 39 + 15 * v).Value = totEff_Srq
+    Range("I" & 40 + 15 * v & ":M" & 40 + 15 * v).Value = avgEff_Srq
+    Cells(41 + 15 * v, 9).Value = tmSize_Srq
+    Range("I" & 44 + 15 * v & ":M" & 44 + 15 * v).Value = rspSla_Srq
+    Range("I" & 45 + 15 * v & ":M" & 45 + 15 * v).Value = rspSlaPrcnt_Srq
+    Range("I" & 46 + 15 * v & ":M" & 46 + 15 * v).Value = resSla_Srq
+    Range("I" & 47 + 15 * v & ":M" & 47 + 15 * v).Value = resSlaPrcnt_Srq
+    Range("I" & 48 + 15 * v & ":M" & 48 + 15 * v).Value = avgClosure_Srq
+    '----------Problem----------
+    Range("N" & 34 + 15 * v & ":R" & 34 + 15 * v).Value = opnBal_Prb
+    Range("N" & 35 + 15 * v & ":R" & 35 + 15 * v).Value = recvd_Prb
+    Range("N" & 36 + 15 * v & ":R" & 36 + 15 * v).Value = carried_Prb
+    Range("N" & 37 + 15 * v & ":R" & 37 + 15 * v).Value = closed_Prb
+    Range("N" & 38 + 15 * v & ":R" & 38 + 15 * v).Value = reOpen_Prb
+    Range("N" & 39 + 15 * v & ":R" & 39 + 15 * v).Value = totEff_Prb
+    Range("N" & 40 + 15 * v & ":R" & 40 + 15 * v).Value = avgEff_Prb
+    Cells(41 + 15 * v, 14).Value = tmSize_Prb
+    Range("N" & 44 + 15 * v & ":R" & 44 + 15 * v).Value = rspSla_Prb
+    Range("N" & 45 + 15 * v & ":R" & 45 + 15 * v).Value = rspSlaPrcnt_Prb
+    Range("N" & 46 + 15 * v & ":R" & 46 + 15 * v).Value = resSla_Prb
+    Range("N" & 47 + 15 * v & ":R" & 47 + 15 * v).Value = resSlaPrcnt_Prb
+    Range("N" & 48 + 15 * v & ":R" & 48 + 15 * v).Value = avgClosure_Prb
+    '----------Change Req----------
+    Range("S" & 34 + 15 * v & ":W" & 34 + 15 * v).Value = opnBal_Chg
+    Range("S" & 35 + 15 * v & ":W" & 35 + 15 * v).Value = recvd_Chg
+    Range("S" & 36 + 15 * v & ":W" & 36 + 15 * v).Value = carried_Chg
+    Range("S" & 37 + 15 * v & ":W" & 37 + 15 * v).Value = closed_Chg
+    Range("S" & 38 + 15 * v & ":W" & 38 + 15 * v).Value = reOpen_Chg
+    Range("S" & 39 + 15 * v & ":W" & 39 + 15 * v).Value = totEff_Chg
+    Range("S" & 40 + 15 * v & ":W" & 40 + 15 * v).Value = avgEff_Chg
+    Cells(41 + 15 * v, 19).Value = tmSize_Chg
+    Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
+    Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
+    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & " - " & quarters(v, 1)
     
 End Sub

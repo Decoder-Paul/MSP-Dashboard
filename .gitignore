@@ -1,0 +1,3 @@
+#all xlsx file will be ignored
+*.xlsx
+~$*.xlsm
