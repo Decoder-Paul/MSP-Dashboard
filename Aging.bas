@@ -27,6 +27,8 @@ Dim Days61_90_INC(4) As Integer
 Dim Days_GT_90_INC(4) As Integer
 Dim Days_Sum_INC(4) As Integer
 Dim Days_total_INC(9) As Integer
+Dim active_INC(4) As Integer
+Dim total_active_INC(1) As Integer
 
 '--------Service Request--------
 Dim Days0_1_SRQ(4) As Integer
@@ -40,6 +42,8 @@ Dim Days61_90_SRQ(4) As Integer
 Dim Days_GT_90_SRQ(4) As Integer
 Dim Days_Sum_SRQ(4) As Integer
 Dim Days_total_SRQ(9) As Integer
+Dim active_SRQ(4) As Integer
+Dim total_active_SRQ(1) As Integer
 
 '--------Problem Statement--------
 Dim Days0_1_PRB(4) As Integer
@@ -53,40 +57,20 @@ Dim Days61_90_PRB(4) As Integer
 Dim Days_GT_90_PRB(4) As Integer
 Dim Days_Sum_PRB(4) As Integer
 Dim Days_total_PRB(9) As Integer
+Dim active_PRB(4) As Integer
+Dim total_active_PRB(1) As Integer
 
 Dim DAlro As Long
 Dim i As Long
 Dim ticket_type As String
 Dim priority As Long
 Dim age_of_tkt As Variant
-Dim element As Long
 Dim Sum As Long
 
 WS_CSS.Activate
 
 WS_DA.Activate
 DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row
-
-'cleaning Aging column in mainData before calculating aging for team
-WS_DA.Range("S2:S" & DAlro).Clear
-
-'Aging calculation logic
-For i = 2 To DAlro
-
-    'Aging for Active tickets
-    'checking whether Actualfinish date is empty
-    If Cells(i, 25).Value = "" Then
-            'Taking difference between todays date and creation date
-            Cells(i, 19).Value = CLng(today) - Cells(i, 23).Value
-    Else
-        'Aging for resolved tickets
-        'checking whether Actualfinish date is not empty and greater than today
-        If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(today) Then
-                'taking the difference between Actualfinish date and Creation date
-                Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
-        End If
-    End If
-Next i
 
 '------------Counting aging based on team, ticket type and priority-----------------
 For i = 2 To DAlro
@@ -97,7 +81,6 @@ For i = 2 To DAlro
         ticket_type = Cells(i, 1).Value
         priority = Cells(i, 12).Value
         age_of_tkt = Cells(i, 19).Value
-        element = Cells(i, 19).Value
         
         'calculating age of ticket for active tickets
         If Cells(i, 25).Value = "" Then
@@ -106,7 +89,9 @@ For i = 2 To DAlro
             Case "INC":
                 Select Case priority
                     Case 1:
-                                                   
+                            active_INC(0) = active_INC(0) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(0) = Days0_1_INC(0) + 1
@@ -149,6 +134,8 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                            active_INC(1) = active_INC(1) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -192,6 +179,8 @@ For i = 2 To DAlro
                             End If
                           
                     Case 3:
+                            active_INC(2) = active_INC(2) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -235,7 +224,10 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
-             
+                    
+                            active_INC(3) = active_INC(3) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(3) = Days0_1_INC(3) + 1
@@ -280,6 +272,8 @@ For i = 2 To DAlro
             Case "SRQ":
                 Select Case priority
                     Case 1:
+                            active_SRQ(0) = active_SRQ(0) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -323,7 +317,9 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
-    
+                            active_SRQ(1) = active_SRQ(1) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
+                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(1) = Days0_1_SRQ(1) + 1
@@ -366,6 +362,8 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            active_SRQ(2) = active_SRQ(2) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -409,7 +407,10 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
-                       
+                            
+                            active_SRQ(3) = active_SRQ(3) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(3) = Days0_1_SRQ(3) + 1
@@ -454,6 +455,8 @@ For i = 2 To DAlro
             Case "PRB":
                 Select Case priority
                     Case 1:
+                            active_PRB(0) = active_PRB(0) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -497,6 +500,8 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                            active_PRB(1) = active_PRB(1) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -540,6 +545,8 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            active_PRB(2) = active_PRB(2) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -584,6 +591,9 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
+                            
+                            active_PRB(3) = active_PRB(3) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -727,6 +737,24 @@ For i = 14 To 22
 Next i
 Cells(23, 18).Value = Sum
 
+Cells(5, 4).Value = active_INC(0)
+Cells(5, 5).Value = active_INC(1)
+Cells(5, 6).Value = active_INC(2)
+Cells(5, 7).Value = active_INC(3)
+
+Cells(5, 9).Value = active_SRQ(0)
+Cells(5, 10).Value = active_SRQ(1)
+Cells(5, 11).Value = active_SRQ(2)
+Cells(5, 12).Value = active_SRQ(3)
+
+Cells(5, 14).Value = active_PRB(0)
+Cells(5, 15).Value = active_PRB(1)
+Cells(5, 16).Value = active_PRB(2)
+Cells(5, 17).Value = active_PRB(3)
+
+Cells(5, 8).Value = total_active_INC(0)
+Cells(5, 13).Value = total_active_SRQ(0)
+Cells(5, 18).Value = total_active_INC(0)
 
 End Sub
 
@@ -758,6 +786,8 @@ Dim Days61_90_INC(4) As Integer
 Dim Days_GT_90_INC(4) As Integer
 Dim Days_Sum_INC(4) As Integer
 Dim Days_total_INC(9) As Integer
+Dim active_INC(4) As Integer
+Dim total_active_INC(1) As Integer
 
 '--------Service Request--------
 Dim Days0_1_SRQ(4) As Integer
@@ -771,6 +801,8 @@ Dim Days61_90_SRQ(4) As Integer
 Dim Days_GT_90_SRQ(4) As Integer
 Dim Days_Sum_SRQ(4) As Integer
 Dim Days_total_SRQ(9) As Integer
+Dim active_SRQ(4) As Integer
+Dim total_active_SRQ(1) As Integer
 
 '--------Problem Statement--------
 Dim Days0_1_PRB(4) As Integer
@@ -784,13 +816,14 @@ Dim Days61_90_PRB(4) As Integer
 Dim Days_GT_90_PRB(4) As Integer
 Dim Days_Sum_PRB(4) As Integer
 Dim Days_total_PRB(9) As Integer
+Dim active_PRB(4) As Integer
+Dim total_active_PRB(1) As Integer
 
 Dim DAlro As Long
 Dim i As Long
 Dim ticket_type As String
 Dim priority As Long
 Dim age_of_tkt As Variant
-Dim element As Long
 Dim Sum As Long
 
 WS_CSS.Activate
@@ -798,34 +831,12 @@ WS_CSS.Activate
 WS_DA.Activate
 DAlro = WS_DA.Cells(WS_DA.Rows.Count, "A").End(xlUp).Row
 
-'cleaning Aging column in mainData before calculating aging for team
-WS_DA.Range("S2:S" & DAlro).Clear
-
-'Aging calculation logic
-For i = 2 To DAlro
-
-    'Aging for Active tickets
-    'checking whether Actualfinish date is empty
-    If Cells(i, 25).Value = "" Then
-            'Taking difference between todays date and creation date
-            Cells(i, 19).Value = CLng(today) - Cells(i, 23).Value
-    Else
-        'Aging for resolved tickets
-        'checking whether Actualfinish date is not empty and greater than today
-        If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(today) Then
-                'taking the difference between todays date and Creation date
-                Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
-        End If
-    End If
-Next i
-
 '------------Counting aging based on team, ticket type and priority-----------------
 For i = 2 To DAlro
-                
+                 
         ticket_type = Cells(i, 1).Value
         priority = Cells(i, 12).Value
         age_of_tkt = Cells(i, 19).Value
-        element = Cells(i, 19).Value
         
         'calculating age of ticket for active tickets
         If Cells(i, 25).Value = "" Then
@@ -834,7 +845,9 @@ For i = 2 To DAlro
             Case "INC":
                 Select Case priority
                     Case 1:
-                                                   
+                            active_INC(0) = active_INC(0) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(0) = Days0_1_INC(0) + 1
@@ -877,6 +890,8 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                            active_INC(1) = active_INC(1) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -920,6 +935,8 @@ For i = 2 To DAlro
                             End If
                           
                     Case 3:
+                            active_INC(2) = active_INC(2) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -963,7 +980,10 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
-             
+                    
+                            active_INC(3) = active_INC(3) + 1
+                            total_active_INC(0) = total_active_INC(0) + 1
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_INC(3) = Days0_1_INC(3) + 1
@@ -1008,6 +1028,8 @@ For i = 2 To DAlro
             Case "SRQ":
                 Select Case priority
                     Case 1:
+                            active_SRQ(0) = active_SRQ(0) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1051,7 +1073,9 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
-    
+                            active_SRQ(1) = active_SRQ(1) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
+                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(1) = Days0_1_SRQ(1) + 1
@@ -1094,6 +1118,8 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            active_SRQ(2) = active_SRQ(2) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1137,7 +1163,10 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
-                       
+                            
+                            active_SRQ(3) = active_SRQ(3) + 1
+                            total_active_SRQ(0) = total_active_SRQ(0) + 1
+                            
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
                                     Days0_1_SRQ(3) = Days0_1_SRQ(3) + 1
@@ -1182,6 +1211,8 @@ For i = 2 To DAlro
             Case "PRB":
                 Select Case priority
                     Case 1:
+                            active_PRB(0) = active_PRB(0) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1225,6 +1256,8 @@ For i = 2 To DAlro
                                 End If
                             End If
                     Case 2:
+                            active_PRB(1) = active_PRB(1) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1268,6 +1301,8 @@ For i = 2 To DAlro
                             End If
                             
                     Case 3:
+                            active_PRB(2) = active_PRB(2) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1312,6 +1347,9 @@ For i = 2 To DAlro
                             End If
                     
                     Case 4 And 5:
+                            
+                            active_PRB(3) = active_PRB(3) + 1
+                            total_active_PRB(0) = total_active_PRB(0) + 1
                             
                             If CStr(age_of_tkt) <> "" And age_of_tkt >= 0 Then
                                 If age_of_tkt >= 0 And age_of_tkt <= 1 Then
@@ -1454,107 +1492,23 @@ For i = 14 To 22
 Next i
 Cells(23, 18).Value = Sum
 
-End Sub
-Function avgClosure(team As String, tkt_type As String, prty As Integer) As Variant
+Cells(5, 4).Value = active_INC(0)
+Cells(5, 5).Value = active_INC(1)
+Cells(5, 6).Value = active_INC(2)
+Cells(5, 7).Value = active_INC(3)
 
-    Dim arrList As Object
-    Set arrList = CreateObject("System.Collections.ArrayList")
-    
-    Dim a As Integer
-    Dim Data_rowCount As Long
-    Dim Data_i As Long
-    
-    WS_DA.Select
-    Data_rowCount = ActiveSheet.Cells(Rows.Count, "A").End(xlUp).Row
-    
-    If team <> "all" Then
-        For Data_i = 2 To Data_rowCount
-            If Cells(Data_i, 8).Value = team Then ' Team Filteration ------
-                If tkt_type = Cells(Data_i, 1).Value Then ' Ticket Type Filteration ------
-                    If prty = Cells(Data_i, 12).Value Then ' Priority Filteration ------
-                        '------ Active Ticket Filteration ------
-                        finishDate = Cells(Data_i, 25).Value
-                        If CStr(finishDate) <> "" Then
-                            arrList.Add Cells(Data_i, 19).Value
-                        End If
-                    End If
-                End If
-            End If
-        Next Data_i
-    Else
-        For Data_i = 2 To Data_rowCount
-            If tkt_type = Cells(Data_i, 1).Value Then ' Ticket Type Filteration ------
-                If prty = Cells(Data_i, 12).Value Then ' Priority Filteration ------
-                    '------ Active Ticket Filteration ------
-                    finishDate = Cells(Data_i, 25).Value
-                    If CStr(finishDate) <> "" Then
-                        arrList.Add Cells(Data_i, 19).Value
-                    End If
-                End If
-            End If
-        Next Data_i
-    End If
-    'Calculating Median down here
-    arrList.Sort
-    a = arrList.Count
-    If a > 0 Then
-        If a Mod 2 = 0 Then
-            avgClosure = (arrList(a / 2) + arrList((a / 2) - 1)) / 2
-        Else
-            avgClosure = arrList(a / 2)
-        End If
-    Else
-        avgClosure = ""
-    End If
-End Function
-Sub medianClousre(ByVal team As String)
-    Dim med_Inc(4) As Variant
-    Dim med_Srq(4) As Variant
-    Dim med_Prb(4) As Variant
-    Dim i As Integer
-    
-    For i = 1 To 5
-        med_Inc(i - 1) = avgClosure(team, "INC", i)
-        med_Srq(i - 1) = avgClosure(team, "SRQ", i)
-        med_Prb(i - 1) = avgClosure(team, "PRB", i)
-    Next i
-'        Priority 4 & 5 combined
-'        med_Inc(3) = med_Inc(3) + avgClosure(team, "INC", 5)
-'        med_Srq(3) = med_Srq(3) + avgClosure(team, "SRQ", 5)
-'        med_Prb(3) = med_Prb(3) + avgClosure(team, "PRB", 5)
-'   For i = 0 To 3
-'        med_Inc(4) = med_Inc(4) + med_Inc(i)
-'        med_Srq(4) = med_Srq(4) + med_Srq(i)
-'        med_Prb(4) = med_Prb(4) + med_Prb(i)
-'    Next i
-    WS_CSS.Select
-    Range("D28:H28").Value = med_Inc
-    Range("I28:M28").Value = med_Srq
-    Range("N28:R28").Value = med_Prb
-End Sub
-Sub medianClousreAll()
-    Dim med_Inc(4) As Variant
-    Dim med_Srq(4) As Variant
-    Dim med_Prb(4) As Variant
-    Dim i As Integer
-    
-    For i = 1 To 5
-        med_Inc(i - 1) = avgClosure("all", "INC", i)
-        med_Srq(i - 1) = avgClosure("all", "SRQ", i)
-        med_Prb(i - 1) = avgClosure("all", "PRB", i)
-    Next i
-'        Priority 4 & 5 combined
-'        med_Inc(3) = med_Inc(3) + avgClosure("all", "INC", 5)
-'        med_Srq(3) = med_Srq(3) + avgClosure("all", "SRQ", 5)
-'        med_Prb(3) = med_Prb(3) + avgClosure("all", "PRB", 5)
-'    For i = 0 To 3
-'        med_Inc(4) = med_Inc(4) + med_Inc(i)
-'        med_Srq(4) = med_Srq(4) + med_Srq(i)
-'        med_Prb(4) = med_Prb(4) + med_Prb(i)
-'    Next i
-    WS_CSS.Select
-    Range("D28:H28").Value = med_Inc
-    Range("I28:M28").Value = med_Srq
-    Range("N28:R28").Value = med_Prb
-End Sub
+Cells(5, 9).Value = active_SRQ(0)
+Cells(5, 10).Value = active_SRQ(1)
+Cells(5, 11).Value = active_SRQ(2)
+Cells(5, 12).Value = active_SRQ(3)
 
+Cells(5, 14).Value = active_PRB(0)
+Cells(5, 15).Value = active_PRB(1)
+Cells(5, 16).Value = active_PRB(2)
+Cells(5, 17).Value = active_PRB(3)
+
+Cells(5, 8).Value = total_active_INC(0)
+Cells(5, 13).Value = total_active_SRQ(0)
+Cells(5, 18).Value = total_active_INC(0)
+
+End Sub

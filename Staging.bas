@@ -86,6 +86,28 @@ Next i
 'Aging column created for capturing aging count
 WS_DA.Cells(R + 1, c + 19).Value = "Aging"
 
+'Aging calculation logic
+For i = 2 To DAlro
+    'Aging for Active tickets
+    'checking whether Actualfinish date is empty
+    If Cells(i, 25).Value = "" Then
+            'Taking difference between todays date and creation date
+            Cells(i, 19).Value = CLng(today) - Cells(i, 23).Value
+    Else
+        'Aging for resolved tickets
+        'checking whether Actualfinish date is not empty and greater than today
+        If Cells(i, 25).Value <> "" Or Cells(i, 25).Value >= CLng(today) Then
+                'taking the difference between Actualfinish date and Creation date
+                Cells(i, 19).Value = Cells(i, 25).Value - Cells(i, 23).Value
+                'for closed tickets if aging is "0" then considering as "1"
+                If Cells(i, 19).Value = 0 Then
+                    Cells(i, 19).Value = 1
+                End If
+        End If
+    End If
+    
+Next i
+
 'columns and rows alignment
 WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).Interior.Color = RGB(46, 139, 87)
 WS_DA.Range(Cells(R + 1, c + 1), Cells(R + 1, c + 19)).RowHeight = 30
