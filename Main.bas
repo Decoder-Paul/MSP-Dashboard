@@ -130,31 +130,28 @@ Sub teamsDashboard()
         'getting team name from main data
         team = Cells(i, 22).Value
         Call agingCount(team)
+        'Active Ticket Stat teamwise
+        Call activeCount(team)
         'generating the dashboard for each team and quarterwise
         For j = 0 To c - 1
             Call ticketCount(team, j)
         Next j
+        Call medianClousre(team)
+        
         'replicating the team's dashboard
         Call ReplicateMainSheet(team)
         'cleansing of CSS sheet after replication
-        'Active Ticket's stat table
-        WS_CSS.Range("D5:R9").ClearContents
-        WS_CSS.Range("T5:X9").ClearContents
-        
-        'Aging Data Table
-        WS_CSS.Range("D14:R23").ClearContents
-        WS_CSS.Range("D28:R28").ClearContents
-        
-        'Quarter Stats Table
-        WS_CSS.Range("D34:W48").ClearContents
-    
+        Call pCleanDBExclusive
     Next i
-
     Call pCleanDBExclusive
+    
+    Call agingCountForAll
+
     For j = 0 To c - 1
         Call ticketCountAll(j)
     Next j
-    Call agingCountForAll
+    Call activeCountAll
+    Call medianClousreAll
 End Sub
 Sub pCleanDBExclusive()
     Dim CSSlro As Integer

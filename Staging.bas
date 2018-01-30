@@ -105,7 +105,6 @@ For i = 2 To DAlro
                 End If
         End If
     End If
-    
 Next i
 
 'columns and rows alignment
