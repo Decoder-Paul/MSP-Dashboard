@@ -24,6 +24,41 @@ Public Function fSheetExists(sheetToFind As String) As Boolean
     Next sheet
 ErrorHandler:
 End Function
+Sub InputDate()
+'========================================================================================================
+' InputDate
+' ------------------------------------------------------------------------------------------------------
+' Purpose of this Function : Taking date input from home page as quarter
+'
+' Author : Subhankar Paul | 9th January, 2018
+' Notes  : Procedure can take dates even from blank quarters in between
+' Parameters :
+' Returns :
+' ---------------------------------------------------------------
+' Revision History
+'
+'========================================================================================================
+
+    Dim i As Integer
+    
+    WS_HM.Select
+    c = 0
+    'quarters is a 2D array with 2 column start date and end date
+    For i = 5 To 33
+        If (Cells(i, 4).Value <> "" And Cells(i, 6).Value <> "") Then
+            If Cells(i, 4).Value < Cells(i, 6).Value Then
+                quarters(c, 0) = Cells(i, 4).Value
+                quarters(c, 1) = Cells(i, 6).Value
+                c = c + 1
+            Else
+                MsgBox "Start date can't be more than end date in Version " & (i + 1) / 2 - 2, vbExclamation
+                End
+            End If
+            
+        End If
+        i = i + 1
+    Next i
+End Sub
 Sub pCleanDB()
 'Procedure to clean the Dashboard
 
@@ -43,15 +78,6 @@ Sub pCleanDB()
     WS_CSS.Range("D34:W48").ClearContents
     
 End Sub
-
-Sub CreateUniqueList()
-'Populating the list of unique team names in Column V in Main Data Sheet
-    WS_DA.Select
-    Dim lastrow As Long
-    lastrow = Cells(Rows.Count, "H").End(xlUp).Row
-    ActiveSheet.Range("H1:H" & lastrow).AdvancedFilter Action:=xlFilterCopy, CopyToRange:=ActiveSheet.Range("V1"), Unique:=True
-End Sub
-
 Sub QtrReplication()
 
 '========================================================================================================
@@ -75,16 +101,18 @@ Dim R As Long
 WS_CSS.Select
 CSSlro = WS_CSS.Cells(WS_CSS.Rows.Count, "C").End(xlUp).Row
 
-If c > 1 And CSSlro > 48 Then
-    
-    'Selection and deletion of below dashboard except top
+If CSSlro > 48 Then
+    'Selection and deletion of below dashboard except first quarter and above
     Rows("49:" & CSSlro).Select
     Selection.Delete Shift:=xlUp
-
 End If
+
+If c > 1 Then
     'Selection of top dashboard template and replicating based on the number of quarter
     Range("A34:W48").Select
     Selection.AutoFill Destination:=Range("A34:W" & (48 + (c - 1) * 15)), Type:=xlFillDefault
+End If
+
 
     'fixing row height and column width
     Rows("34:" & CSSlro).RowHeight = 30
@@ -105,6 +133,15 @@ End If
     Columns("S").ColumnWidth = 9
 
 End Sub
+
+Sub CreateUniqueList()
+'Populating the list of unique team names in Column V in Main Data Sheet
+    WS_DA.Select
+    Dim lastrow As Long
+    lastrow = Cells(Rows.Count, "H").End(xlUp).Row
+    ActiveSheet.Range("H1:H" & lastrow).AdvancedFilter Action:=xlFilterCopy, CopyToRange:=ActiveSheet.Range("V1"), Unique:=True
+End Sub
+
 Sub pCloseApp()
 '========================================================================================================
 ' pCloseApp
