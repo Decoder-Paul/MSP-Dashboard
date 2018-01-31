@@ -26,8 +26,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Inc(4) As Integer
     Dim closed_Inc(4) As Integer
     Dim reOpen_Inc(4) As Integer
-    Dim totEff_Inc(4) As Long
-    Dim avgEff_Inc(4) As Integer
+    Dim totEff_Inc(4) As Double
+    Dim avgEff_Inc(4) As Double
     Dim tmSize_Inc As Integer
     Dim rspSla_Inc(4) As Integer
     Dim rspSlaPrcnt_Inc(4) As Integer
@@ -41,8 +41,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Srq(4) As Integer
     Dim closed_Srq(4) As Integer
     Dim reOpen_Srq(4) As Integer
-    Dim totEff_Srq(4) As Long
-    Dim avgEff_Srq(4) As Integer
+    Dim totEff_Srq(4) As Double
+    Dim avgEff_Srq(4) As Double
     Dim tmSize_Srq As Integer
     Dim rspSla_Srq(4) As Integer
     Dim rspSlaPrcnt_Srq(4) As Integer
@@ -56,8 +56,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Prb(4) As Integer
     Dim closed_Prb(4) As Integer
     Dim reOpen_Prb(4) As Integer
-    Dim totEff_Prb(4) As Long
-    Dim avgEff_Prb(4) As Integer
+    Dim totEff_Prb(4) As Double
+    Dim avgEff_Prb(4) As Double
     Dim tmSize_Prb As Integer
     Dim rspSla_Prb(4) As Integer
     Dim rspSlaPrcnt_Prb(4) As Integer
@@ -71,8 +71,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Dim carried_Chg(4) As Integer
     Dim closed_Chg(4) As Integer
     Dim reOpen_Chg(4) As Integer
-    Dim totEff_Chg(4) As Long
-    Dim avgEff_Chg(4) As Integer
+    Dim totEff_Chg(4) As Double
+    Dim avgEff_Chg(4) As Double
     Dim tmSize_Chg As Integer
     Dim winMiss_Chg(4) As Integer
     Dim winMissPrcnt_Chg(4) As Integer
@@ -859,25 +859,32 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
         totEff_Chg(4) = totEff_Chg(4) + totEff_Chg(i)
         winMiss_Chg(4) = winMiss_Chg(4) + winMiss_Chg(i)
     Next i
+    'Conversion of Minutes to Hours for Total Effort
+    For i = 0 To 4
+        totEff_Inc(i) = Round(totEff_Inc(i) / 60, 2)
+        totEff_Srq(i) = Round(totEff_Srq(i) / 60, 2)
+        totEff_Prb(i) = Round(totEff_Prb(i) / 60, 2)
+        totEff_Chg(i) = Round(totEff_Chg(i) / 60, 2)
+    Next i
     'average is being calculated here
     For i = 0 To 4
         If closed_Inc(i) <> 0 Then
-            avgEff_Inc(i) = totEff_Inc(i) / closed_Inc(i)
+            avgEff_Inc(i) = Round(totEff_Inc(i) / closed_Inc(i), 2)
             resSlaPrcnt_Inc(i) = resSla_Inc(i) * 100 / closed_Inc(i)
             avgClosure_Inc(i) = cloDur_Inc(i) / closed_Inc(i)
         End If
         If closed_Srq(i) <> 0 Then
-            avgEff_Srq(i) = totEff_Srq(i) / closed_Srq(i)
+            avgEff_Srq(i) = Round(totEff_Srq(i) / closed_Srq(i), 2)
             resSlaPrcnt_Srq(i) = resSla_Srq(i) * 100 / closed_Srq(i)
             avgClosure_Srq(i) = cloDur_Srq(i) / closed_Srq(i)
         End If
         If closed_Prb(i) <> 0 Then
-            avgEff_Prb(i) = totEff_Prb(i) / closed_Prb(i)
+            avgEff_Prb(i) = Round(totEff_Prb(i) / closed_Prb(i), 2)
             resSlaPrcnt_Prb(i) = resSla_Prb(i) * 100 / closed_Prb(i)
             avgClosure_Prb(i) = cloDur_Prb(i) / closed_Prb(i)
         End If
         If closed_Chg(i) <> 0 Then
-            avgEff_Chg(i) = totEff_Chg(i) / closed_Chg(i)
+            avgEff_Chg(i) = Round(totEff_Chg(i) / closed_Chg(i), 2)
             winMissPrcnt_Chg(i) = winMiss_Chg(i) * 100 / closed_Chg(i)
         End If
         
@@ -963,7 +970,8 @@ Sub ticketCount(ByVal team As String, ByVal v As Integer)
     Cells(41 + 15 * v, 19).Value = tmSize_Chg
     Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
     Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
-    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & " - " & quarters(v, 1)
+    'Quarter Range of date placing
+    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & "  -  " & quarters(v, 1)
     
 End Sub
 Sub ticketCountAll(ByVal v As Integer)
@@ -992,8 +1000,8 @@ Sub ticketCountAll(ByVal v As Integer)
     Dim carried_Inc(4) As Integer
     Dim closed_Inc(4) As Integer
     Dim reOpen_Inc(4) As Integer
-    Dim totEff_Inc(4) As Long
-    Dim avgEff_Inc(4) As Integer
+    Dim totEff_Inc(4) As Double
+    Dim avgEff_Inc(4) As Double
     Dim tmSize_Inc As Integer
     Dim rspSla_Inc(4) As Integer
     Dim rspSlaPrcnt_Inc(4) As Integer
@@ -1007,8 +1015,8 @@ Sub ticketCountAll(ByVal v As Integer)
     Dim carried_Srq(4) As Integer
     Dim closed_Srq(4) As Integer
     Dim reOpen_Srq(4) As Integer
-    Dim totEff_Srq(4) As Long
-    Dim avgEff_Srq(4) As Integer
+    Dim totEff_Srq(4) As Double
+    Dim avgEff_Srq(4) As Double
     Dim tmSize_Srq As Integer
     Dim rspSla_Srq(4) As Integer
     Dim rspSlaPrcnt_Srq(4) As Integer
@@ -1022,8 +1030,8 @@ Sub ticketCountAll(ByVal v As Integer)
     Dim carried_Prb(4) As Integer
     Dim closed_Prb(4) As Integer
     Dim reOpen_Prb(4) As Integer
-    Dim totEff_Prb(4) As Long
-    Dim avgEff_Prb(4) As Integer
+    Dim totEff_Prb(4) As Double
+    Dim avgEff_Prb(4) As Double
     Dim tmSize_Prb As Integer
     Dim rspSla_Prb(4) As Integer
     Dim rspSlaPrcnt_Prb(4) As Integer
@@ -1037,8 +1045,8 @@ Sub ticketCountAll(ByVal v As Integer)
     Dim carried_Chg(4) As Integer
     Dim closed_Chg(4) As Integer
     Dim reOpen_Chg(4) As Integer
-    Dim totEff_Chg(4) As Long
-    Dim avgEff_Chg(4) As Integer
+    Dim totEff_Chg(4) As Double
+    Dim avgEff_Chg(4) As Double
     Dim tmSize_Chg As Integer
     Dim winMiss_Chg(4) As Integer
     Dim winMissPrcnt_Chg(4) As Integer
@@ -1822,25 +1830,32 @@ Sub ticketCountAll(ByVal v As Integer)
         totEff_Chg(4) = totEff_Chg(4) + totEff_Chg(i)
         winMiss_Chg(4) = winMiss_Chg(4) + winMiss_Chg(i)
     Next i
+    'Conversion of Minutes to Hours for Total Effort
+    For i = 0 To 4
+        totEff_Inc(i) = Round(totEff_Inc(i) / 60, 2)
+        totEff_Srq(i) = Round(totEff_Srq(i) / 60, 2)
+        totEff_Prb(i) = Round(totEff_Prb(i) / 60, 2)
+        totEff_Chg(i) = Round(totEff_Chg(i) / 60, 2)
+    Next i
     'average is being calculated here
     For i = 0 To 4
         If closed_Inc(i) <> 0 Then
-            avgEff_Inc(i) = totEff_Inc(i) / closed_Inc(i)
+            avgEff_Inc(i) = Round(totEff_Inc(i) / closed_Inc(i), 2)
             resSlaPrcnt_Inc(i) = resSla_Inc(i) * 100 / closed_Inc(i)
             avgClosure_Inc(i) = cloDur_Inc(i) / closed_Inc(i)
         End If
         If closed_Srq(i) <> 0 Then
-            avgEff_Srq(i) = totEff_Srq(i) / closed_Srq(i)
+            avgEff_Srq(i) = Round(totEff_Srq(i) / closed_Srq(i), 2)
             resSlaPrcnt_Srq(i) = resSla_Srq(i) * 100 / closed_Srq(i)
             avgClosure_Srq(i) = cloDur_Srq(i) / closed_Srq(i)
         End If
         If closed_Prb(i) <> 0 Then
-            avgEff_Prb(i) = totEff_Prb(i) / closed_Prb(i)
+            avgEff_Prb(i) = Round(totEff_Prb(i) / closed_Prb(i), 2)
             resSlaPrcnt_Prb(i) = resSla_Prb(i) * 100 / closed_Prb(i)
             avgClosure_Prb(i) = cloDur_Prb(i) / closed_Prb(i)
         End If
         If closed_Chg(i) <> 0 Then
-            avgEff_Chg(i) = totEff_Chg(i) / closed_Chg(i)
+            avgEff_Chg(i) = Round(totEff_Chg(i) / closed_Chg(i), 2)
             winMissPrcnt_Chg(i) = winMiss_Chg(i) * 100 / closed_Chg(i)
         End If
         
@@ -1926,6 +1941,7 @@ Sub ticketCountAll(ByVal v As Integer)
     Cells(41 + 15 * v, 19).Value = tmSize_Chg
     Range("S" & 42 + 15 * v & ":W" & 42 + 15 * v).Value = winMiss_Chg
     Range("S" & 43 + 15 * v & ":W" & 43 + 15 * v).Value = winMissPrcnt_Chg
-    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & " - " & quarters(v, 1)
+    'Quarter Range of date placing
+    Cells(34 + 15 * v, 2).Value = quarters(v, 0) & "  -  " & quarters(v, 1)
     
 End Sub
