@@ -54,10 +54,13 @@ Sub pOpenApp()
     Call InputDate
 
     Call pCleanDB
+    
+    'Quaterwise layout replication
     Call QtrReplication
     
     Call mainDataStaging
     
+    'Unique list of teams
     Call CreateUniqueList
     
     Call teamsDashboard
@@ -69,36 +72,6 @@ Sub pOpenApp()
     'Notify user in seconds
     MsgBox "Application ran successfully in " & SecondsElapsed & " seconds", vbInformation
 End Sub
-
-Sub InputDate()
-'========================================================================================================
-' InputDate
-' ------------------------------------------------------------------------------------------------------
-' Purpose of this Function : Taking date input from home page as quarter
-'
-' Author : Subhankar Paul | 9th January, 2018
-' Notes  : Procedure can take dates even from blank quarters in between
-' Parameters :
-' Returns :
-' ---------------------------------------------------------------
-' Revision History
-'
-'========================================================================================================
-
-    Dim i As Integer
-    
-    WS_HM.Select
-    c = 0
-    For i = 5 To 33
-        If (Cells(i, 4).Value <> "" And Cells(i, 6).Value <> "") Then
-            quarters(c, 0) = Cells(i, 4).Value
-            quarters(c, 1) = Cells(i, 6).Value
-            c = c + 1
-        End If
-        i = i + 1
-    Next i
-End Sub
-
 Sub teamsDashboard()
 '========================================================================================================
 ' Main Data for Staging
@@ -126,9 +99,9 @@ Sub teamsDashboard()
     
     'Calling ReplicateMainSheet method for each team
     For i = 2 To DAlro
-        WS_DA.Activate
+    
         'getting team name from main data
-        team = Cells(i, 22).Value
+        team = WS_DA.Cells(i, 22).Value
         Call agingCount(team)
         'Active Ticket Stat teamwise
         Call activeCount(team)
@@ -136,6 +109,7 @@ Sub teamsDashboard()
         For j = 0 To c - 1
             Call ticketCount(team, j)
         Next j
+        'calculating the median of closure rate teamwise
         Call medianClousre(team)
         
         'replicating the team's dashboard
@@ -143,10 +117,12 @@ Sub teamsDashboard()
         'cleansing of CSS sheet after replication
         Call pCleanDBExclusive
     Next i
+    
     Call pCleanDBExclusive
     
+    'calling the below procedures only for Consolidated Report
+    
     Call agingCountForAll
-
     For j = 0 To c - 1
         Call ticketCountAll(j)
     Next j
@@ -155,6 +131,7 @@ Sub teamsDashboard()
 End Sub
 Sub pCleanDBExclusive()
     Dim CSSlro As Integer
+    CSSlro = WS_CSS.Cells(WS_DA.Rows.Count, "C").End(xlUp).Row
     'Support Dashboard contents cleansing
     'Active Ticket's stat table
     WS_CSS.Range("D5:R9").ClearContents
@@ -163,7 +140,7 @@ Sub pCleanDBExclusive()
     'Aging Data Table
     WS_CSS.Range("D14:R23").ClearContents
     WS_CSS.Range("D28:R28").ClearContents
-    CSSlro = WS_CSS.Cells(WS_DA.Rows.Count, "C").End(xlUp).Row
+    
     'Quarter Stats Table
     WS_CSS.Range("D34:W" & CSSlro).ClearContents
 End Sub
